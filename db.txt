@@ -1,0 +1,12 @@
+create a user table in MySQL database
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('customer','agent','admin') NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
+
+INSERT INTO users (username, password, role) VALUES ('admin', 'PASTE_HASHED_PASSWORD_HERE', 'admin');
