@@ -29,13 +29,13 @@ These instructions will help you set up and run the project on your local machin
 4. Set up your MySQL database and ensure it is running.
 5. Create a `.env` file in the root directory and configure the environment variables: JWT_SECRET=your_jwt_secret
 
-JWT_REFRESH_SECRET=your_jwt_refresh_secret
-MYSQL_HOST=localhost
-MYSQL_USER=your_mysql_username
-MYSQL_PASSWORD=your_mysql_password
-MYSQL_DATABASE_NAME=your_database_name
-NODE_ENV=development
-PORT=3000
+    - JWT_REFRESH_SECRET=your_jwt_refresh_secret
+    - MYSQL_HOST=localhost  
+    - MYSQL_USER=your_mysql_username
+    - MYSQL_PASSWORD=your_mysql_password
+    - MYSQL_DATABASE_NAME=your_database_name
+    - NODE_ENV=development
+    - PORT=3000
 
 6. Start the server with: npm start
 
