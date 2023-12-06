@@ -1,10 +1,26 @@
+const bcrypt = require('bcryptjs');
 const userModel = require('../models/userModel');
+const { validationResult, check } = require('express-validator'); 
+
+// Helper function for input validation
+const validateUserInput = [
+  check('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
+  check('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+  check('role').isIn(['user', 'admin', 'otherRoles']).withMessage('Invalid role'), // Add other roles as needed
+];
 
 // Create new user
 const createUser = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const { username, password, role } = req.body;
-    await userModel.createUser(username, password, role);
+    const hashedPassword = await bcrypt.hash(password, 8);
+    await userModel.createUser(username, hashedPassword, role);
+    console.log(`User created: ${username}`); // Audit log
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Internal server error', error: error.message });
@@ -28,9 +44,16 @@ const getUserDetails = async (req, res) => {
 
 // Update user
 const updateUser = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   try {
     const { username, password } = req.body;
-    await userModel.updateUser(req.params.id, username, password);
+    const hashedPassword = await bcrypt.hash(password, 8);
+    await userModel.updateUser(req.params.id, username, hashedPassword);
+    console.log(`User updated: ${username}`); // Audit log
     res.json({ message: 'User updated successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Internal server error', error: error.message });
@@ -45,6 +68,7 @@ const deleteUser = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Internal server error', error: error.message });
   }
+  console.log(`User deleted: ID ${req.params.id}`); // Audit log
 };
 
 // List all users
@@ -63,9 +87,9 @@ const listUsers = async (req, res) => {
 };
 
 module.exports = {
-  createUser,
+  createUser: [validateUserInput, createUser],
   getUserDetails,
-  updateUser,
+  updateUser: [validateUserInput, updateUser],
   deleteUser,
   listUsers
 };

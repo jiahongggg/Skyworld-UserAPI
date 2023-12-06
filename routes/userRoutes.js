@@ -7,7 +7,7 @@ const router = express.Router();
 
 // testing
 // router.post('/signup', userApiController.createUser);
-router.post('/login', authController.login);
+router.post('/login', authController.loginRateLimiter, authController.login);
 
 // CRUD operations
 router.post('/', authenticateToken, authorizeRole('admin'), userApiController.createUser);

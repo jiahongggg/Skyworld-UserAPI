@@ -3,21 +3,29 @@ require('dotenv').config();
 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  if (!authHeader) return res.status(401).json({ message: 'Authorization token is required' });
 
-  if (token == null) return res.sendStatus(401);
+  const parts = authHeader.split(' ');
+  if (parts.length !== 2 || parts[0] !== 'bearer') {
+    return res.status(401).json({ message: 'Malformed token' });
+  }
+
+  const token = parts[1];
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
+    if (err) {
+      const message = err.name === 'JsonWebTokenError' ? 'Invalid token' : 'Token expired';
+      return res.status(403).json({ message });
+    }
     req.user = user;
     next();
   });
 }
 
-function authorizeRole(role) {
+function authorizeRole(...allowedRoles) {
   return (req, res, next) => {
-    if (req.user.role !== role) {
-      return res.status(403).json({ message: 'Forbidden' });
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'Insufficient permissions' });
     }
     next();
   };
