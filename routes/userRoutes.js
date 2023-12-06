@@ -5,6 +5,8 @@ const { authenticateToken, authorizeRole } = require('../middleware/authMiddlewa
 
 const router = express.Router();
 
+// testing
+// router.post('/signup', userApiController.createUser);
 router.post('/login', authController.login);
 
 // CRUD operations
