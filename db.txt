@@ -8,4 +8,3 @@ CREATE TABLE users (
     refresh_token TEXT
 );
 
-INSERT INTO users (username, password, role) VALUES ('admin', 'PASTE_HASHED_PASSWORD_HERE', 'admin');
