@@ -39,7 +39,7 @@ async function initializeDatabase() {
 
   app.use(express.json());
   app.use(cookieParser());
-  app.use('/api/users', require('./routes/userRoutes'));
+  app.use('/api/v1/users', require('./routes/userRoutes'));
 
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
