@@ -61,7 +61,7 @@ async function findUserById(id) {
 
 // Update a user's details
 async function updateUser(id, username, password) {
-  const hashedPassword = await bcrypt.hash(password, 8);
+  const hashedPassword = await bcrypt.hash(password, 10);
   const connection = await db.connect();
   try {
     await connection.execute('UPDATE users SET username = ?, password = ? WHERE id = ?', [username, hashedPassword, id]);
