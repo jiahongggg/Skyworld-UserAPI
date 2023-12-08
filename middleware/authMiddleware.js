@@ -1,34 +1,34 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  if (!authHeader) return res.status(401).json({ message: 'Authorization token is required' });
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-  const parts = authHeader.split(' ');
-  if (parts.length !== 2 || parts[0] !== 'bearer') {
-    return res.status(401).json({ message: 'Malformed token' });
+  if (!authHeader) {
+    return res.status(401).json({ message: 'No token provided' });
   }
 
-  const token = parts[1];
+  const token = authHeader.split(' ')[1];
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      const message = err.name === 'JsonWebTokenError' ? 'Invalid token' : 'Token expired';
-      return res.status(403).json({ message });
-    }
-    req.user = user;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    console.log('Decoded token:', decoded);
     next();
-  });
-}
+  } catch (error) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+};
 
-function authorizeRole(...allowedRoles) {
+const checkAccess = (allowedRoles) => {
   return (req, res, next) => {
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Insufficient permissions' });
+    const { role } = req.user;
+    if (allowedRoles.includes(role)) {
+      next();
+    } else {
+      return res.status(403).json({ message: 'Access denied' });
     }
-    next();
   };
-}
+};
 
-module.exports = { authenticateToken, authorizeRole };
+module.exports = { verifyToken, checkAccess };

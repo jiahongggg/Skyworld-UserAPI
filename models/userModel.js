@@ -3,14 +3,33 @@ const jwt = require('jsonwebtoken');
 const db = require('./db');
 
 // Create a new user
-async function createUser(username, password, role) {
-  const hashedPassword = await bcrypt.hash(password, 10);
+async function createUser(userId, username, password, role, createdBy) {
+  const hashedPassword = await bcrypt.hash(password, 8);
   const connection = await db.connect();
+
   try {
-    const [result] = await connection.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', [username, hashedPassword, role]);
-    const refreshToken = jwt.sign({ id: result.insertId, role: role }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
-    await connection.execute('UPDATE users SET refresh_token = ? WHERE id = ?', [refreshToken, result.insertId]);
-    return { userId: result.insertId, refreshToken };
+    // Check if the username is already taken
+    const [existingUser] = await connection.execute('SELECT * FROM users WHERE Username = ?', [username]);
+    if (existingUser.length > 0) {
+      throw new Error('Username already exists');
+    }
+
+    const currentDate = new Date();
+    const dateCreated = currentDate.toISOString().slice(0, 19).replace('T', ' '); // Format as "YYYY-MM-DD HH:mm:ss"
+    const modifiedBy = createdBy;
+    const dateModified = dateCreated;
+
+    const [result] = await connection.execute(
+      'INSERT INTO users (UUID, Username, Password, Remark, CreatedBy, DateCreated, ModifiedBy, DateModified, Deleted, Role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [userId, username, hashedPassword, null, createdBy, dateCreated, modifiedBy, dateModified, false, role]
+    );
+
+    // Create a JWT token with userId, username, and role
+    const tokenPayload = { id: userId, username: username, role: role };
+    const refreshToken = jwt.sign(tokenPayload, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+
+    await connection.execute('UPDATE users SET RefreshToken = ? WHERE UUID = ?', [refreshToken, userId]);
+    return { userId, refreshToken };
   } finally {
     await connection.end();
   }
@@ -20,7 +39,7 @@ async function createUser(username, password, role) {
 async function findUserByUsername(username) {
   const connection = await db.connect();
   try {
-    const [rows] = await connection.execute('SELECT * FROM users WHERE username = ?', [username]);
+    const [rows] = await connection.execute('SELECT * FROM users WHERE Username = ?', [username]);
     return rows[0];
   } finally {
     await connection.end();
@@ -31,7 +50,7 @@ async function findUserByUsername(username) {
 async function updateRefreshToken(userId, refreshToken) {
   const connection = await db.connect();
   try {
-    await connection.execute('UPDATE users SET refresh_token = ? WHERE id = ?', [refreshToken, userId]);
+    await connection.execute('UPDATE users SET RefreshToken = ? WHERE UUID = ?', [refreshToken, userId]);
   } finally {
     await connection.end();
   }
@@ -41,7 +60,7 @@ async function updateRefreshToken(userId, refreshToken) {
 async function validateRefreshToken(refreshToken) {
   const connection = await db.connect();
   try {
-    const [rows] = await connection.execute('SELECT * FROM users WHERE refresh_token = ?', [refreshToken]);
+    const [rows] = await connection.execute('SELECT * FROM users WHERE RefreshToken = ?', [refreshToken]);
     return rows.length > 0 ? rows[0] : false;
   } finally {
     await connection.end();
@@ -49,10 +68,10 @@ async function validateRefreshToken(refreshToken) {
 }
 
 // Find a user by their ID
-async function findUserById(id) {
+async function findUserById(userId) {
   const connection = await db.connect();
   try {
-    const [rows] = await connection.execute('SELECT * FROM users WHERE id = ?', [id]);
+    const [rows] = await connection.execute('SELECT * FROM users WHERE UUID = ?', [userId]);
     return rows[0];
   } finally {
     await connection.end();
@@ -60,21 +79,32 @@ async function findUserById(id) {
 }
 
 // Update a user's details
-async function updateUser(id, username, password) {
-  const hashedPassword = await bcrypt.hash(password, 10);
+async function updateUser(userId, updateData) {
   const connection = await db.connect();
   try {
-    await connection.execute('UPDATE users SET username = ?, password = ? WHERE id = ?', [username, hashedPassword, id]);
+    const fieldUpdates = [];
+    const values = [];
+
+    for (const key in updateData) {
+      fieldUpdates.push(`${key} = ?`);
+      values.push(updateData[key]);
+    }
+
+    values.push(userId);
+
+    const updateQuery = `UPDATE users SET ${fieldUpdates.join(', ')} WHERE UUID = ?`;
+
+    await connection.execute(updateQuery, values);
   } finally {
     await connection.end();
   }
 }
 
 // Delete a user
-async function deleteUser(id) {
+async function deleteUser(userId) {
   const connection = await db.connect();
   try {
-    await connection.execute('DELETE FROM users WHERE id = ?', [id]);
+    await connection.execute('DELETE FROM users WHERE UUID = ?', [userId]);
   } finally {
     await connection.end();
   }
