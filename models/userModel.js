@@ -4,7 +4,7 @@ const db = require('./db');
 
 // Create a new user
 async function createUser(username, password, role) {
-  const hashedPassword = await bcrypt.hash(password, 8);
+  const hashedPassword = await bcrypt.hash(password, 10);
   const connection = await db.connect();
   try {
     const [result] = await connection.execute('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', [username, hashedPassword, role]);
