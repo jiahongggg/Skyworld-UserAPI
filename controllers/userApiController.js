@@ -22,7 +22,7 @@ const createUser = async (req, res) => {
     const userId = uuidv4(); // Generate a UUID for the user
     const hashedPassword = await bcrypt.hash(password, 10);
     const createdBy = req.user.username; // Get the username of the user who created this user
-    await userModel.createUser(userId, username, hashedPassword, createdBy, role);
+    await userModel.createUser(userId, username, hashedPassword, role, createdBy);
     console.log(`User created: ${username}`); // Audit log
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
