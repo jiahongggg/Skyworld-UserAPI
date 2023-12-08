@@ -5,6 +5,7 @@ The SkyWorld User API, a Node.js-based RESTful service, follows the MVC pattern.
 ## Table of Contents
 
 - [Getting Started](#getting-started)
+- [Dependencies](#Dependencies)
 - [API Endpoints](#api-endpoints)
 - [Middleware](#middleware)
 - [Models](#models)
@@ -51,6 +52,28 @@ The SkyWorld User API, a Node.js-based RESTful service, follows the MVC pattern.
 
     The API should now be running on the specified port (default: 3000).
 
+## Dependencies
+
+The SkyWorld User API relies on the following dependencies:
+
+- bcryptjs: Password hashing library for user authentication.
+- cookie-parser: Middleware for handling HTTP cookies.
+- crypto: Node.js module for cryptographic functionality.
+- dotenv: Module for loading environment variables from a .env file.
+- express: Web application framework for Node.js.
+- express-rate-limit: Middleware for rate-limiting HTTP requests.
+- express-validator: Middleware for request data validation.
+- jsonwebtoken: Library for creating and verifying JSON Web Tokens (JWT).
+- mysql2: MySQL database driver for Node.js.
+- mysql2-promise: Promise-based wrapper for the MySQL 2 package.
+- uuid: Library for generating UUIDs (Universally Unique Identifiers).
+- nodemon: Development dependency for automatic server restarting during development.
+
+    ```bash
+    npm install bcryptjs cookie-parser crypto dotenv express express-rate-limit express-validator jsonwebtoken mysql2 mysql2-promise uuid nodemon --save
+
+    ```
+
 ## API Endpoints
 
 ### Authentication
@@ -88,13 +111,6 @@ Requires admin privileges to create users. Input validation is applied to ensure
 
 ### userApiController.js
 - Handles user-related actions such as creating, retrieving, updating, and deleting users.
-
-- Secure user registration and login process.
-- JWT access and refresh token generation for authenticated sessions.
-- Encrypted password storage using bcrypt.
-- Role-based authorization checks for protected routes.
-- Refresh token mechanism for extended authentication sessions.
-- CRUD operations for user management, restricted to admin users.
 
 ## Database
 
