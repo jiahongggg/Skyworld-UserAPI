@@ -1,10 +1,19 @@
 create a user table in MySQL database
 
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role ENUM('user', 'admin') NOT NULL,
-    refresh_token TEXT
-);
+-- DW_STUDENT.users definition
+
+CREATE TABLE `users` (
+  `UUID` varchar(36) NOT NULL,
+  `Username` varchar(128) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Role` enum('admin','editor','user') NOT NULL DEFAULT 'user',
+  `RefreshToken` varchar(255) DEFAULT NULL,
+  `Remark` varchar(1000) DEFAULT NULL,
+  `CreatedBy` varchar(255) NOT NULL,
+  `DateCreated` datetime NOT NULL,
+  `ModifiedBy` varchar(128) NOT NULL,
+  `DateModified` varchar(255) NOT NULL,
+  `Deleted` bit(1) NOT NULL,
+  PRIMARY KEY (`UUID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

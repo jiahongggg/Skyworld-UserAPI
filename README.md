@@ -1,8 +1,93 @@
-# Skyworld User API
+# SkyWorld User API
 
-This project is a user authentication system built with Node.js and Express, featuring JWT-based authentication. It allows users to register, login, and perform CRUD operations on user profiles with MySQL as the database for secure data storage.
+The SkyWorld User API, a Node.js-based RESTful service, follows the MVC pattern. It facilitates user authentication, management, and token operations, offering CRUD functionalities for user accounts
 
-## Features
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [API Endpoints](#api-endpoints)
+- [Middleware](#middleware)
+- [Models](#models)
+- [Controllers](#controllers)
+- [Database](#database)
+- [Application Entry Point](#application-entry-point)
+- [Contact](#contact)
+
+## Getting Started
+
+1. **Clone the Repository:**
+
+   ```bash
+   git clone https://github.com/jiahongggg/Skyworld-UserAPI.git
+    ```
+
+2. **Install Dependencies:**
+
+    ```bash
+    npm install
+    ```
+
+3. **Set Up Environment Variables:**
+
+    Create a .env file in the root directory with the following content:
+
+    ```bash
+    NODE_ENV=development
+    PORT=3000
+    MYSQL_HOST=<your-mysql-host>
+    MYSQL_PORT=<your-mysql-port>
+    MYSQL_DATABASE=<your-mysql-database>
+    MYSQL_USER=<your-mysql-username>
+    MYSQL_PASSWORD=<your-mysql-password>
+    JWT_SECRET=<your-jwt-secret>
+    JWT_REFRESH_SECRET=<your-jwt-refresh-secret>
+    ```
+
+4. **Run the Application:**
+
+    ```bash
+    npm start
+    ```
+
+    The API should now be running on the specified port (default: 3000).
+
+## API Endpoints
+
+### Authentication
+
+- POST `/api/v1/users/login`: Logs in a user and provides an access token.
+Rate-limited to prevent brute-force attacks.
+Requires a valid username and password in the request body.
+- POST `/api/v1/users/refresh`: Refreshes the access token using a valid refresh token stored in an HTTP-only cookie.
+Requires a valid refresh token in the cookie.
+- POST `/api/v1/users/logout`: Logs out the user by clearing the refresh token cookie.
+
+### User Management
+- POST `/api/v1/users`: Creates a new user with the specified username, password, and role.
+Requires admin privileges to create users. Input validation is applied to ensure a valid username, password, and role.
+- GET `/api/v1/users`: Lists all users. Requires admin or editor privileges to view the user list.
+- GET `/api/v1/users/:id`: Retrieves details of a specific user by their ID. Requires admin or editor privileges to view user details.
+- PUT `/api/v1/users/:id`: Updates user details (username, password, role) for a specific user by their ID. Requires admin or editor privileges to update user details. Input validation is applied to ensure valid updates.
+- DELETE `/api/v1/users/:id`: Deletes a specific user by their ID. Requires admin privileges to delete users.
+
+## Middleware
+
+### authMiddleware.js
+
+- Provides middleware for token verification (verifyToken) and role-based access control (checkAccess).
+
+## Models
+
+### userModel.js
+- Defines functions for user-related database operations such as creating, retrieving, updating, and deleting users.
+
+## Controllers
+
+### authController.js
+- Contains functions for user authentication, token generation, and logout.
+
+### userApiController.js
+- Handles user-related actions such as creating, retrieving, updating, and deleting users.
 
 - Secure user registration and login process.
 - JWT access and refresh token generation for authenticated sessions.
@@ -11,67 +96,16 @@ This project is a user authentication system built with Node.js and Express, fea
 - Refresh token mechanism for extended authentication sessions.
 - CRUD operations for user management, restricted to admin users.
 
-## Getting Started
+## Database
 
-These instructions will help you set up and run the project on your local machine for development and testing purposes.
+### db.js
+- Handles database connection and exports a connection pool.
 
-### Prerequisites
+## Application Entry Point
 
-- Node.js
-- npm (Node Package Manager)
-- MySQL database
-
-### Installation
-
-1. Clone the repository to your local machine: git clone [Your Repository URL]
-2. Navigate to the project directory: cd [Your Repository Name]
-3. Install the required npm packages: npm install
-4. Set up your MySQL database and ensure it is running.
-5. Create a `.env` file in the root directory and configure the environment variables: JWT_SECRET=your_jwt_secret
-
-    - JWT_REFRESH_SECRET=your_jwt_refresh_secret
-    - MYSQL_HOST=localhost  
-    - MYSQL_USER=your_mysql_username
-    - MYSQL_PASSWORD=your_mysql_password
-    - MYSQL_DATABASE_NAME=your_database_name
-    - NODE_ENV=development
-    - PORT=3000
-
-6. Start the server with: npm start
-
-Your server should now be running on `http://localhost:3000`.
-
-## Usage
-
-Here are the API endpoints provided by the system:
-
-- `POST /api/users/login`: Logs in a user and returns an access token.
-- `POST /api/users/refresh`: Refreshes an access token using a refresh token.
-- `POST /api/users/logout`: Logs out a user, invalidating the refresh token.
-- `POST /api/users`: (Admin only) Creates a new user.
-- `GET /api/users/:id`: Retrieves user details.
-- `PUT /api/users/:id`: (Admin only) Updates user details.
-- `DELETE /api/users/:id`: (Admin only) Deletes a user.
-- `GET /api/users`: (Admin only) Lists all users.
-
-## API Documentation
-
-For detailed API documentation, refer to the `docs` directory within the project repository.
-
-## Contributing
-
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
-
-## Acknowledgments
-
-- Thanks to all Node.js contributors for maintaining such a powerful and flexible runtime environment.
-- Kudos to the Express team for their excellent web framework.
+### app.js
+- The main application entry point, which sets up the Express app, connects to the database, and defines routes.
+- Handles database connection and exports a connection pool.
 
 ## Contact
 
