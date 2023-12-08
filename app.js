@@ -1,17 +1,18 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet'); 
 const db = require('./models/db');
 require('dotenv').config();
 
 const app = express();
 
-// Immediately invoked function to connect to the database
+app.use(helmet());
+
 (async () => {
   try {
     const dbConnection = await db.connect();
     console.log("Connected to MySQL database");
 
-    // Make the database connection available through the app context
     app.use((req, res, next) => {
       req.db = dbConnection;
       next();

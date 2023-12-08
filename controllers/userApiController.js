@@ -5,9 +5,16 @@ const { v4: uuidv4 } = require('uuid');
 
 // Helper function for input validation
 const validateUserInput = [
-  check('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters long'),
-  check('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-  check('role').isIn(['user', 'admin', 'editor']).withMessage('Invalid role'), // Add other roles as needed
+  check('username')
+    .isLength({ min: 3 }).withMessage('Username must be at least 3 characters long')
+    .trim() // Remove leading and trailing spaces
+    .escape(), // Escapes HTML special characters
+  check('password')
+    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+  check('role')
+    .isIn(['user', 'admin', 'editor']).withMessage('Invalid role')
+    .trim()
+    .escape(),
 ];
 
 // Create new user
