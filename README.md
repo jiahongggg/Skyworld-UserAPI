@@ -54,24 +54,24 @@ The SkyWorld User API, a Node.js-based RESTful service, follows the MVC pattern.
 
 ## Dependencies
 
-The SkyWorld User API relies on the following dependencies:
+### The SkyWorld User API relies on the following dependencies:
 
-- bcryptjs: Password hashing library for user authentication.
-- cookie-parser: Middleware for handling HTTP cookies.
-- crypto: Node.js module for cryptographic functionality.
-- dotenv: Module for loading environment variables from a .env file.
-- express: Web application framework for Node.js.
-- express-rate-limit: Middleware for rate-limiting HTTP requests.
-- express-validator: Middleware for request data validation.
-- helmet: Middleware for securing your Express apps by setting various HTTP headers.
-- jsonwebtoken: Library for creating and verifying JSON Web Tokens (JWT).
-- jest: JavaScript testing framework.
-- morgan: Middleware for HTTP request/response logging.
-- mysql2: MySQL database driver for Node.js.
-- mysql2-promise: Promise-based wrapper for the MySQL 2 package.
-- nodemon: Development dependency for automatic server restarting during development.
-- supertest: Library for testing HTTP assertions.
-- uuid: Library for generating UUIDs (Universally Unique Identifiers).
+- `bcryptjs`: Password hashing library for user authentication.
+- `cookie-parser`: Middleware for handling HTTP cookies.
+- `crypto`: Node.js module for cryptographic functionality.
+- `dotenv`: Module for loading environment variables from a .env file.
+- `express`: Web application framework for Node.js.
+- `express-rate-limit`: Middleware for rate-limiting HTTP requests.
+- `express-validator`: Middleware for request data validation.
+- `helmet`: Middleware for securing your Express apps by setting various HTTP headers.
+- `jsonwebtoken`: Library for creating and verifying JSON Web Tokens (JWT).
+- `jest`: JavaScript testing framework.
+- `morgan`: Middleware for HTTP request/response logging.
+- `mysql2`: MySQL database driver for Node.js.
+- `mysql2-promise`: Promise-based wrapper for the MySQL 2 package.
+- `nodemon`: Development dependency for automatic server restarting during development.
+- `supertest`: Library for testing HTTP assertions.
+- `uuid`: Library for generating UUIDs (Universally Unique Identifiers).
 
     ```bash
     npm install bcryptjs cookie-parser crypto dotenv express express-rate-limit express-validator helmet jest jsonwebtoken morgan mysql2 mysql2-promise nodemon supertest uuid --save
