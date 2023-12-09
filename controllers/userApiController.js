@@ -102,6 +102,7 @@ const deleteUser = async (req, res) => {
 const listUsers = async (req, res) => {
   try {
     const users = await userModel.listAllUsers();
+    console.log(users);
     // Exclude sensitive fields from the results
     const usersWithoutSensitiveInfo = users.map((user) => {
       const { password, refresh_token, ...userWithoutSensitiveFields } = user;

@@ -64,6 +64,7 @@ The SkyWorld User API relies on the following dependencies:
 - express-rate-limit: Middleware for rate-limiting HTTP requests.
 - express-validator: Middleware for request data validation.
 - jsonwebtoken: Library for creating and verifying JSON Web Tokens (JWT).
+- morgan: Middleware for HTTP request/response logging.
 - mysql2: MySQL database driver for Node.js.
 - mysql2-promise: Promise-based wrapper for the MySQL 2 package.
 - uuid: Library for generating UUIDs (Universally Unique Identifiers).
@@ -71,7 +72,7 @@ The SkyWorld User API relies on the following dependencies:
 - nodemon: Development dependency for automatic server restarting during development.
 
     ```bash
-    npm install bcryptjs cookie-parser crypto dotenv express express-rate-limit express-validator jsonwebtoken mysql2 mysql2-promise uuid nodemon helmet --save
+    npm install bcryptjs cookie-parser crypto dotenv express express-rate-limit express-validator jsonwebtoken mysql2 mysql2-promise uuid nodemon helmet morgan --save
     ```
 
 ## API Endpoints
