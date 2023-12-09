@@ -2,7 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet'); 
 const db = require('./models/db');
-const morgan = require('morgan'); // Import morgan
+const morgan = require('morgan'); 
 require('dotenv').config();
 
 const app = express();
@@ -34,3 +34,5 @@ app.use(helmet());
     process.exit(1);
   }
 })();
+
+module.exports = app;
