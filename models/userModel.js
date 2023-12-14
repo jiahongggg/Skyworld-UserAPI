@@ -42,9 +42,7 @@ async function findUserByUsername(username) {
     const [rows] = await connection.execute('SELECT * FROM users WHERE Username = ?', [username]);
     return rows[0];
   } finally {
-    if (connection) {
-      await connection.end();
-    }
+    await connection.end();
   }
 }
 
