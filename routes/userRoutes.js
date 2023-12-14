@@ -19,5 +19,13 @@ router.route('/:id')
   .put(verifyToken, checkAccess(['admin', 'editor']), userApiController.updateUser)
   .delete(verifyToken, checkAccess(['admin']), userApiController.deleteUser);
 
+router.route('/apiCollectionGroups')
+  .post(verifyToken, checkAccess(['admin']), userApiController.createApiCollectionGroup)
+  .get(verifyToken, checkAccess(['admin', 'editor']), userApiController.listApiCollectionGroups);
+
+router.route('/userApiCollectionGroup')
+  .post(verifyToken, checkAccess(['admin']), userApiController.assignApiCollectionGroupToUser);
+
 module.exports = router;
+
 

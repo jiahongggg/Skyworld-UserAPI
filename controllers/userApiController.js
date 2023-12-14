@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs');
 const userModel = require('../models/userModel');
+const userApiCollectionGroupModel = require('../models/userApiCollectionGroupModel');
+const apiCollectionGroupsModel = require('../models/apiCollectionGroupsModel');
 const { validationResult, check } = require('express-validator');
 const { v4: uuidv4 } = require('uuid');
 
@@ -113,10 +115,47 @@ const listUsers = async (req, res) => {
   }
 };
 
+// Function to assign API collection group to a user
+const assignApiCollectionGroupToUser = async (req, res) => {
+  try {
+    const { userUUID, apiCollectionGroupId } = req.body;
+    const uuid = uuidv4(); // Generate a UUID for the user_api_collection_group
+    await userApiCollectionGroupModel.assignGroupToUser(uuid, userUUID, apiCollectionGroupId);
+    res.status(201).json({ message: 'API Collection Group assigned successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+// Function to list all API collection groups
+const listApiCollectionGroups = async (req, res) => {
+  try {
+    const groups = await apiCollectionGroupsModel.listAllGroups();
+    res.json(groups);
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+// Function to create a new API collection group
+const createApiCollectionGroup = async (req, res) => {
+  try {
+    const { name } = req.body;
+    await apiCollectionGroupsModel.createGroup(name);
+    res.status(201).json({ message: 'API Collection Group created successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
+
 module.exports = {
   createUser: [validateUserInput, createUser],
   getUserDetails,
   updateUser: [validateUserInput, updateUser],
   deleteUser,
   listUsers,
+  assignApiCollectionGroupToUser,
+  listApiCollectionGroups,
+  createApiCollectionGroup
 };
