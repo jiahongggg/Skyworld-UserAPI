@@ -1,8 +1,7 @@
-// const userController = require('../controllers/userController');
 const express = require('express');
 const authController = require('../controllers/authController');
 const userApiController = require('../controllers/userApiController');
-const { verifyToken, checkAccess } = require('../middleware/authMiddleware');
+const { verifyToken, checkAccess, checkApiAccess } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -20,12 +19,28 @@ router.route('/:id')
   .delete(verifyToken, checkAccess(['admin']), userApiController.deleteUser);
 
 router.route('/apiCollectionGroups')
-  .post(verifyToken, checkAccess(['admin']), userApiController.createApiCollectionGroup)
-  .get(verifyToken, checkAccess(['admin', 'editor']), userApiController.listApiCollectionGroups);
+  .post(verifyToken, checkAccess(['admin']), userApiController.createApiCollectionGroup);
+  // .get(verifyToken, checkAccess(['admin', 'editor']), userApiController.listApiCollectionGroups);
 
 router.route('/userApiCollectionGroup')
   .post(verifyToken, checkAccess(['admin']), userApiController.assignApiCollectionGroupToUser);
 
+router.route('/userApiCollectionGroup/:userUUID')
+  .get(verifyToken, checkAccess(['admin', 'editor']), userApiController.listUserApiCollectionGroups);
+
+router.route('/customers-api')
+  .get(checkApiAccess('customers'), (req, res) => {
+    // Your customers API logic
+  });
+
+router.route('/leads-api')
+  .get(checkApiAccess('leads'), (req, res) => {
+    // Your leads API logic
+  });
+
+router.route('/sales-api')
+  .get(checkApiAccess('sales'), (req, res) => {
+    // Your sales API logic
+  });
+
 module.exports = router;
-
-

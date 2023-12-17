@@ -20,27 +20,28 @@ async function login(req, res) {
 
   try {
     const user = await userModel.findUserByUsername(username);
+
     if (!user) {
       return res.status(401).json({ message: 'Authentication failed' });
     }
 
     const isMatch = await bcrypt.compare(password, user.Password);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Authentication failed' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const accessToken = jwt.sign(
-      { id: user.UUID, username: user.Username, role: user.Role },
+      { id: user.UserUUID, username: user.Username, role: user.Role },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
-
+    
     const refreshToken = jwt.sign(
-      { id: user.UUID, username: user.Username, role: user.Role },
+      { id: user.UserUUID, username: user.Username, role: user.Role },
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: '7d' }
-    );
-
+    );    
+    
     // Set refresh token in httpOnly cookie
     res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
 

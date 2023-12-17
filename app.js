@@ -1,8 +1,8 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const helmet = require('helmet'); 
+const helmet = require('helmet');
 const db = require('./models/db');
-const morgan = require('morgan'); 
+const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
@@ -24,7 +24,6 @@ app.use(helmet());
     app.use(express.json());
     app.use(cookieParser());
     app.use('/api/v1/users', require('./routes/userRoutes'));
-    app.use('/api/v1/customers', require('./routes/customerEmergencyRoutes'));
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {

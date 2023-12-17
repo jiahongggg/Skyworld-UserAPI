@@ -20,7 +20,7 @@ async function createUser(userId, username, password, role, createdBy) {
     const dateModified = dateCreated;
 
     const [result] = await connection.execute(
-      'INSERT INTO users (UUID, Username, Password, Remark, CreatedBy, DateCreated, ModifiedBy, DateModified, Deleted, Role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (UserUUID, Username, Password, Remark, CreatedBy, DateCreated, ModifiedBy, DateModified, Deleted, Role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [userId, username, hashedPassword, null, createdBy, dateCreated, modifiedBy, dateModified, false, role]
     );
 
@@ -28,7 +28,7 @@ async function createUser(userId, username, password, role, createdBy) {
     const tokenPayload = { id: userId, username: username, role: role };
     const refreshToken = jwt.sign(tokenPayload, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
-    await connection.execute('UPDATE users SET RefreshToken = ? WHERE UUID = ?', [refreshToken, userId]);
+    await connection.execute('UPDATE users SET RefreshToken = ? WHERE UserUUID = ?', [refreshToken, userId]);
     return { userId, refreshToken };
   } finally {
     await connection.end();
@@ -50,7 +50,7 @@ async function findUserByUsername(username) {
 async function updateRefreshToken(userId, refreshToken) {
   const connection = await db.connect();
   try {
-    await connection.execute('UPDATE users SET RefreshToken = ? WHERE UUID = ?', [refreshToken, userId]);
+    await connection.execute('UPDATE users SET RefreshToken = ? WHERE UserUUID = ?', [refreshToken, userId]);
   } finally {
     await connection.end();
   }
@@ -71,7 +71,7 @@ async function validateRefreshToken(refreshToken) {
 async function findUserById(userId) {
   const connection = await db.connect();
   try {
-    const [rows] = await connection.execute('SELECT * FROM users WHERE UUID = ?', [userId]);
+    const [rows] = await connection.execute('SELECT * FROM users WHERE UserUUID = ?', [userId]);
     return rows[0];
   } finally {
     await connection.end();
@@ -92,7 +92,7 @@ async function updateUser(userId, updateData) {
 
     values.push(userId);
 
-    const updateQuery = `UPDATE users SET ${fieldUpdates.join(', ')} WHERE UUID = ?`;
+    const updateQuery = `UPDATE users SET ${fieldUpdates.join(', ')} WHERE UserUUID = ?`;
 
     await connection.execute(updateQuery, values);
   } finally {
@@ -104,7 +104,7 @@ async function updateUser(userId, updateData) {
 async function deleteUser(userId) {
   const connection = await db.connect();
   try {
-    await connection.execute('DELETE FROM users WHERE UUID = ?', [userId]);
+    await connection.execute('DELETE FROM users WHERE UserUUID = ?', [userId]);
   } finally {
     await connection.end();
   }

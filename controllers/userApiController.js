@@ -42,8 +42,7 @@ const createUser = async (req, res) => {
 // Read user details
 const getUserDetails = async (req, res) => {
   try {
-    const user = await userModel.findUserById(req.params.id);
-
+    const user = await userModel.findUserById(req.params.id); 
     console.log(`User details retrieved: ID ${req.params.id}`); // Audit log
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -127,10 +126,14 @@ const assignApiCollectionGroupToUser = async (req, res) => {
   }
 };
 
-// Function to list all API collection groups
-const listApiCollectionGroups = async (req, res) => {
+// Function to list API collection groups for a user
+const listUserApiCollectionGroups = async (req, res) => {
   try {
-    const groups = await apiCollectionGroupsModel.listAllGroups();
+    const userUUID = req.params.id; // Get the user UUID from the request parameters
+    console.log(`test: ${req.params.id}`);
+    console.log(`Retrieving API collection groups for user ${userUUID}`)
+    const groups = await userApiCollectionGroupModel.listGroupsForUser(userUUID);
+
     res.json(groups);
   } catch (error) {
     res.status(500).json({ message: 'Internal server error', error: error.message });
@@ -148,6 +151,15 @@ const createApiCollectionGroup = async (req, res) => {
   }
 };
 
+// Function to list all API collection groups
+// const listApiCollectionGroups = async (req, res) => {
+//   try {
+//     const groups = await apiCollectionGroupsModel.listAllGroups();
+//     res.json(groups);
+//   } catch (error) {
+//     res.status(500).json({ message: 'Internal server error', error: error.message });
+//   }
+// };
 
 module.exports = {
   createUser: [validateUserInput, createUser],
@@ -156,6 +168,7 @@ module.exports = {
   deleteUser,
   listUsers,
   assignApiCollectionGroupToUser,
-  listApiCollectionGroups,
-  createApiCollectionGroup
+  listUserApiCollectionGroups,
+  createApiCollectionGroup,
+  // listApiCollectionGroups,
 };
