@@ -24,6 +24,7 @@ app.use(helmet());
     app.use(express.json());
     app.use(cookieParser());
     app.use('/api/v1/users', require('./routes/userRoutes'));
+    app.use('/api/v1/customers', require('./routes/customerRoutes'));
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
