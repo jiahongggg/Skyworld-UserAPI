@@ -36,12 +36,16 @@ const checkAccess = (allowedRoles) => {
 const checkApiAccess = (requiredApiGroupName) => {
   return async (req, res, next) => {
     try {
-      const userUUID = req.user.UserUUID; 
-      const userApiGroups = await userApiCollectionGroupModel.getUserApiGroups(userUUID);
+      const userUUID = req.user.id; 
+      const userApiGroups = await userApiCollectionGroupModel.getUserApiGroups(userUUID);   
+      console.log('User API Groups:', userApiGroups); 
       const groupNameMapping = await apiCollectionGroupsModel.getApiGroupNameMapping();
+      console.log('Group Name Mapping:', groupNameMapping);
 
       // Check if user has access
-      const hasAccess = userApiGroups.some(apiGroupId => groupNameMapping[apiGroupId] === requiredApiGroupName);
+      const hasAccess = userApiGroups.some(
+        (apiGroupId) => groupNameMapping[apiGroupId] === requiredApiGroupName
+      );
 
       if (hasAccess) {
         next();
@@ -49,6 +53,7 @@ const checkApiAccess = (requiredApiGroupName) => {
         res.status(403).json({ message: 'Access Denied: You do not have permission to access this API.' });
       }
     } catch (error) {
+      console.error('Error in checkApiAccess middleware:', error);
       res.status(500).json({ message: 'Server error while checking API access' });
     }
   };

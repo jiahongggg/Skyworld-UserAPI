@@ -33,9 +33,9 @@ async function getApiGroupNameMapping() {
   const connection = await db.connect();
 
   try {
-    const results = await connection.execute('SELECT ApiGroupID, Name FROM api_collection_groups');
+    const [rows] = await connection.execute('SELECT ApiGroupID, Name FROM api_collection_groups');
     const mapping = {};
-    results.forEach(row => {
+    rows.forEach(row => {
       mapping[row.ApiGroupID] = row.Name;
     });
     return mapping;

@@ -28,19 +28,4 @@ router.route('/userApiCollectionGroup')
 router.route('/userApiCollectionGroup/:userUUID')
   .get(verifyToken, checkAccess(['admin', 'editor']), userApiController.listUserApiCollectionGroups);
 
-router.route('/customers-api')
-  .get(checkApiAccess('customers'), (req, res) => {
-    // Your customers API logic
-  });
-
-router.route('/leads-api')
-  .get(checkApiAccess('leads'), (req, res) => {
-    // Your leads API logic
-  });
-
-router.route('/sales-api')
-  .get(checkApiAccess('sales'), (req, res) => {
-    // Your sales API logic
-  });
-
 module.exports = router;

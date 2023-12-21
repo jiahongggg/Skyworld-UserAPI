@@ -1,5 +1,21 @@
 const db = require('./db');
 
+// Function to get API groups associated with a user
+async function getUserApiGroups(userUUID) {
+  const connection = await db.connect();
+  try {
+    const [rows] = await connection.execute(
+      'SELECT ApiGroupID FROM user_api_collection_group WHERE UserUUID = ?',
+      [userUUID]
+    );
+
+    const apiGroupIDs = rows.map((row) => row.ApiGroupID);
+    return apiGroupIDs;
+  } finally {
+    await connection.end();
+  }
+}
+
 // Assign an API collection group to a user
 async function assignGroupToUser(uuid, userUUID, apiCollectionGroupId) {
   const connection = await db.connect();
@@ -57,6 +73,7 @@ async function listGroupsForUser(userUUID) {
 }
 
 module.exports = {
+  getUserApiGroups,
   assignGroupToUser,
   isUserInGroup,
   listGroupsForUser,
