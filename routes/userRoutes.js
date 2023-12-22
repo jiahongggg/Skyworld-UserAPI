@@ -5,12 +5,13 @@ const { verifyToken, checkAccess } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-// Middleware for all user routes
-router.use(verifyToken);
-
+// Login routes without the verifyToken middleware
 router.post('/login', authController.loginRateLimiter, authController.login);
 router.post('/refresh', authController.refreshAccessToken);
 router.post('/logout', authController.logout);
+
+// Apply verifyToken middleware to all other routes
+router.use(verifyToken);
 
 // Routes with common middleware
 router.route('/')
