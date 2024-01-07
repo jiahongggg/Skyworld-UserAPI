@@ -25,6 +25,8 @@ app.use(helmet());
     app.use(cookieParser());
     app.use('/api/v1/users', require('./routes/userRoutes'));
     app.use('/api/v1/customers', require('./routes/customerRoutes'));
+    app.use('/api/v1/leads', require('./routes/leadRoutes'));
+    app.use('/api/v1/sales', require('./routes/salesRoutes'));
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
