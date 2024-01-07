@@ -1,6 +1,10 @@
 const leadModel = require('../models/leadModel');
 const { v4: uuidv4 } = require('uuid');
 
+// Define the default page size and maximum page size
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 50;
+
 const createLead = async (req, res) => {
     try {
         console.log("Received lead data:", req.body);
@@ -76,7 +80,14 @@ const deleteLead = async (req, res) => {
 
 const listAllLeads = async (req, res) => {
     try {
-        const leads = await leadModel.listAllLeads();
+        // Extract pagination parameters from the request query, defaulting to page 1 and 10 records per page
+        const pageNumber = parseInt(req.query.pageNumber) || 1;
+        const pageSize = parseInt(req.query.pageSize) || DEFAULT_PAGE_SIZE;
+
+        // Ensure pageSize is within limits
+        const effectivePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+
+        const leads = await leadModel.listAllLeads(pageNumber, effectivePageSize);
         res.status(200).json(leads);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching leads', error: error.message });

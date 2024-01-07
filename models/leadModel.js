@@ -157,11 +157,23 @@ async function deleteLead(leadId) {
     }
 }
 
-async function listAllLeads() {
+async function listAllLeads(pageNumber = 1, pageSize = 10) {
+    // Ensure pageNumber and pageSize are integers
+    pageNumber = parseInt(pageNumber);
+    pageSize = parseInt(pageSize);
+    
+    const offset = (pageNumber - 1) * pageSize;
     const connection = await db.connect();
+
+    console.log(`Executing query with pageSize: ${pageSize}, offset: ${offset}`);
+
     try {
-        const [rows] = await connection.execute('SELECT * FROM leads');
+        const query = `SELECT * FROM leads LIMIT ${pageSize} OFFSET ${offset}`;
+        const [rows] = await connection.execute(query);
         return rows;
+    } catch (error) {
+        console.error('Error executing query:', error);
+        throw error;
     } finally {
         await connection.end();
     }

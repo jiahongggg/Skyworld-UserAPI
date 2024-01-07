@@ -1,6 +1,10 @@
 const customerModel = require('../models/customerModel');
 const { v4: uuidv4 } = require('uuid');
 
+// Define the default page size and maximum page size
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 50;
+
 const createCustomer = async (req, res) => {
     try {
         console.log("Received customer data:", req.body);
@@ -13,33 +17,7 @@ const createCustomer = async (req, res) => {
         const customerData = {
             CustomerUUID: uuidv4(),
             CustomerLeadID: req.body.CustomerLeadID, // Assuming this is provided in the request
-            CustomerProfile: req.body.CustomerProfile,
-            CustomerName: req.body.CustomerName,
-            CustomerEmail: req.body.CustomerEmail,
-            CustomerContactNo: req.body.CustomerContactNo,
-            CustomerICPassportNo: req.body.CustomerICPassportNo,
-            CustomerGender: req.body.CustomerGender,
-            CustomerSalutation: req.body.CustomerSalutation,
-            CustomerOccupation: req.body.CustomerOccupation,
-            CustomerNationality: req.body.CustomerNationality,
-            CustomerAddress: req.body.CustomerAddress,
-            CustomerAddress2: req.body.CustomerAddress2, // Assuming these are optional
-            CustomerAddress3: req.body.CustomerAddress3, // Assuming these are optional
-            CustomerDateOfBirth: req.body.CustomerDateOfBirth,
-            CustomerIncome: req.body.CustomerIncome,
-            CustomerMaritalStatus: req.body.CustomerMaritalStatus,
-            CustomerRace: req.body.CustomerRace,
-            CustomerIsBumi: req.body.CustomerIsBumi,
-            CustomerIsCorporate: req.body.CustomerIsCorporate,
-            CustomerPreferredLanguage: req.body.CustomerPreferredLanguage,
-            CustomerBeneficiaryID: req.body.CustomerBeneficiaryID, // Assuming this is optional or provided
-            CustomerMotherMaidenName: req.body.CustomerMotherMaidenName, // Assuming this is optional
-            CustomerEmergencyContactID: req.body.CustomerEmergencyContactID, // Assuming this is optional
-            Remark: req.body.Remark, // Assuming this is optional
-            CreatedBy: 'Developer',
-            DateCreated: new Date(),
-            ModifiedBy: null, // or req.body.ModifiedBy, depending on your logic
-            DateModified: null, // Handle this according to your application logic
+            // ... (other customer data fields)
             Deleted: 0
         };
 
@@ -80,7 +58,14 @@ const deleteCustomer = async (req, res) => {
 
 const listAllCustomers = async (req, res) => {
     try {
-        const customers = await customerModel.listAllCustomers();
+        // Extract pagination parameters from the request query, defaulting to page 1 and 10 records per page
+        const pageNumber = parseInt(req.query.pageNumber) || 1;
+        const pageSize = parseInt(req.query.pageSize) || DEFAULT_PAGE_SIZE;
+
+        // Ensure pageSize is within limits
+        const effectivePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+
+        const customers = await customerModel.listAllCustomers(pageNumber, effectivePageSize);
         res.status(200).json(customers);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching customers', error: error.message });

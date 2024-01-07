@@ -169,11 +169,21 @@ async function deleteCustomer(customerId) {
     }
 }
 
-async function listAllCustomers() {
+async function listAllCustomers(pageNumber = 1, pageSize = 10) {
+    // Ensure pageNumber and pageSize are integers
+    pageNumber = parseInt(pageNumber);
+    pageSize = parseInt(pageSize);
+    
     const connection = await db.connect();
+
+    console.log(`Executing query with pageSize: ${pageSize}, offset: ${(pageNumber - 1) * pageSize}`);
+
     try {
-        const [rows] = await connection.execute('SELECT * FROM customers');
+        const [rows] = await connection.execute(`SELECT * FROM customers LIMIT ${pageSize} OFFSET ${(pageNumber - 1) * pageSize}`);
         return rows;
+    } catch (error) {
+        console.error('Error executing query:', error);
+        throw error;
     } finally {
         await connection.end();
     }

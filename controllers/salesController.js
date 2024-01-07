@@ -1,6 +1,10 @@
 const salesModel = require('../models/salesModel');
 const { v4: uuidv4 } = require('uuid');
 
+// Define the default page size and maximum page size
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 50;
+
 const createSales = async (req, res) => {
     try {
         console.log("Received sales data:", req.body);
@@ -65,7 +69,14 @@ const deleteSales = async (req, res) => {
 
 const listAllSales = async (req, res) => {
     try {
-        const sales = await salesModel.listAllSales();
+        // Extract page number and page size from query parameters
+        const pageNumber = parseInt(req.query.pageNumber) || 1;
+        const pageSize = parseInt(req.query.pageSize) || DEFAULT_PAGE_SIZE;
+
+        // Ensure pageSize is within limits
+        const effectivePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+
+        const sales = await salesModel.listAllSales(pageNumber, effectivePageSize);
         res.status(200).json(sales);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching sales', error: error.message });
