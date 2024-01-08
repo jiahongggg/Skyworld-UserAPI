@@ -1,5 +1,7 @@
 const customerModel = require('../models/customerModel');
 const { v4: uuidv4 } = require('uuid');
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 600 }); // Cache results for 10 minutes
 
 // Define the default page size and maximum page size
 const DEFAULT_PAGE_SIZE = 10;
@@ -93,8 +95,25 @@ const listAllCustomers = async (req, res) => {
         // Ensure pageSize is within limits
         const effectivePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
 
-        const customers = await customerModel.listAllCustomers(pageNumber, effectivePageSize);
-        res.status(200).json(customers);
+        // Create a cache key based on the query parameters
+        const cacheKey = `listAllCustomers:${pageNumber}:${effectivePageSize}`;
+
+        // Check if the data is cached
+        const cachedData = cache.get(cacheKey);
+
+        if (cachedData) {
+            // If cached data exists, return it
+            res.status(200).json(cachedData);
+        } else {
+            // If data is not cached, fetch it from the database
+            const customers = await customerModel.listAllCustomers(pageNumber, effectivePageSize);
+
+            // Store the data in the cache
+            cache.set(cacheKey, customers);
+
+            // Send the data to the client
+            res.status(200).json(customers);
+        }
     } catch (error) {
         res.status(500).json({ message: 'Error fetching customers', error: error.message });
     }
