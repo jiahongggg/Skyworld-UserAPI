@@ -10,12 +10,12 @@ router.use(verifyToken);
 router.use(checkApiAccess('customers'));
 
 router.route('/')
-  .post(checkAccess('editor'), customerController.createCustomer)
+  .post(checkAccess(['admin', 'editor']), customerController.createCustomer)
   .get(customerController.listAllCustomers);
 
 router.route('/:id')
   .get(customerController.getCustomer)
-  .put(checkAccess('editor'), customerController.updateCustomer)
+  .put(checkAccess(['admin', 'editor']), customerController.updateCustomer)
   .delete(checkAccess('admin'), customerController.deleteCustomer);
 
 module.exports = router;

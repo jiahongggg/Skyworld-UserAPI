@@ -16,7 +16,7 @@ const createCustomer = async (req, res) => {
         // Extracting customer data from the request body
         const customerData = {
             CustomerUUID: uuidv4(),
-            CustomerLeadID: req.body.CustomerLeadID, // Assuming this is provided in the request
+            CustomerLeadID: req.body.CustomerLeadID,
             CustomerProfile: req.body.CustomerProfile,
             CustomerName: req.body.CustomerName,
             CustomerEmail: req.body.CustomerEmail,
@@ -27,8 +27,8 @@ const createCustomer = async (req, res) => {
             CustomerOccupation: req.body.CustomerOccupation,
             CustomerNationality: req.body.CustomerNationality,
             CustomerAddress: req.body.CustomerAddress,
-            CustomerAddress2: req.body.CustomerAddress2, // Assuming these are optional
-            CustomerAddress3: req.body.CustomerAddress3, // Assuming these are optional
+            CustomerAddress2: req.body.CustomerAddress2,
+            CustomerAddress3: req.body.CustomerAddress3,
             CustomerDateOfBirth: req.body.CustomerDateOfBirth,
             CustomerIncome: req.body.CustomerIncome,
             CustomerMaritalStatus: req.body.CustomerMaritalStatus,
@@ -36,18 +36,20 @@ const createCustomer = async (req, res) => {
             CustomerIsBumi: req.body.CustomerIsBumi,
             CustomerIsCorporate: req.body.CustomerIsCorporate,
             CustomerPreferredLanguage: req.body.CustomerPreferredLanguage,
-            CustomerBeneficiaryID: req.body.CustomerBeneficiaryID, // Assuming this is optional or provided
-            CustomerMotherMaidenName: req.body.CustomerMotherMaidenName, // Assuming this is optional
-            CustomerEmergencyContactID: req.body.CustomerEmergencyContactID, // Assuming this is optional
-            Remark: req.body.Remark, // Assuming this is optional
+            CustomerBeneficiaryID: req.body.CustomerBeneficiaryID,
+            CustomerMotherMaidenName: req.body.CustomerMotherMaidenName,
+            CustomerEmergencyContactID: req.body.CustomerEmergencyContactID,
+            Remark: req.body.Remark,
             CreatedBy: 'Developer',
             DateCreated: new Date(),
-            ModifiedBy: null, // or req.body.ModifiedBy, depending on your logic
-            DateModified: null, // Handle this according to your application logic
+            ModifiedBy: null,
+            DateModified: null,
             Deleted: 0
         };
 
-        await customerModel.createCustomer(customerData);
+        // Create customer with checking foreign key constraints
+        const result = await customerModel.createCustomer(customerData);
+
 
         res.status(201).send({ message: 'Customer created successfully', CustomerUUID: customerData.CustomerUUID });
     } catch (error) {

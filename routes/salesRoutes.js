@@ -10,12 +10,12 @@ router.use(verifyToken);
 router.use(checkApiAccess('sales'));
 
 router.route('/')
-  .post(checkAccess('editor'), salesController.createSales)
+  .post(checkAccess(['admin', 'editor']), salesController.createSales)
   .get(salesController.listAllSales);
 
 router.route('/:id')
   .get(salesController.getSales)
-  .put(checkAccess('editor'), salesController.updateSales)
+  .put(checkAccess(['admin', 'editor']), salesController.updateSales)
   .delete(checkAccess('admin'), salesController.deleteSales);
 
 module.exports = router;

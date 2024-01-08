@@ -38,8 +38,8 @@ const createLead = async (req, res) => {
             Remark: req.body.Remark,
             CreatedBy: 'Developer',
             DateCreated: new Date(),
-            ModifiedBy: null, // or req.body.ModifiedBy, depending on your logic
-            DateModified: null, // Handle this according to your application logic
+            ModifiedBy: null,
+            DateModified: null,
             Deleted: 0
         };
 

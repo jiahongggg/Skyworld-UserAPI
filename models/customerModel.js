@@ -1,5 +1,10 @@
 const db = require('./db');
-const mysql = require('mysql2'); 
+const mysql = require('mysql2');
+const { v4: uuidv4 } = require('uuid');
+const globalAddressModel = require('./globalAddressModel');
+const globalContactModel = require('./globalContactModel');
+const globalCountryModel = require('./globalCountryModel');
+const globalEmailModel = require('./globalEmailModel');
 
 async function existsInTable(table, column, value) {
     const connection = await db.connect();
@@ -18,6 +23,7 @@ async function existsInTable(table, column, value) {
 
 async function createCustomer(customerData) {
     const connection = await db.connect();
+    let addressUUID = null;
     try {
         // First, check all foreign key constraints
         const fkConstraintsValid = await checkForeignKeyConstraints(customerData);
@@ -25,7 +31,90 @@ async function createCustomer(customerData) {
             throw new Error('Foreign key constraint validation failed');
         }
 
-        // Then, proceed with the INSERT operation
+        // Handle global_address
+        if (customerData.CustomerAddress) {
+            addressUUID = customerData.CustomerAddress.AddressUUID || uuidv4();
+
+            // Check if the address already exists in the global_address table
+            const addressExists = await globalAddressModel.getGlobalAddressByAddressUUID(addressUUID);
+
+            if (!addressExists) {
+                // Create the address only if it doesn't exist
+                await globalAddressModel.createGlobalAddress(
+                    addressUUID,
+                    customerData.CustomerAddress.Address,
+                    customerData.CustomerAddress.Postcode,
+                    customerData.CustomerAddress.City,
+                    customerData.CustomerAddress.State,
+                    customerData.CustomerAddress.Country,
+                    null,
+                    'Developer',
+                    new Date(),
+                    null,
+                    null,
+                    0
+                );
+            }
+        }
+
+        // Handle global_contact
+        if (customerData.CustomerContactNo) {
+            // Check if the contact number already exists in the global_contact table
+            const contactExists = await globalContactModel.getGlobalContactByContact(customerData.CustomerContactNo);
+
+            if (!contactExists) {
+                // Create the contact only if it doesn't exist
+                await globalContactModel.createGlobalContact(
+                    customerData.CustomerContactNo,
+                    null,
+                    'Developer',
+                    new Date(),
+                    null,
+                    null,
+                    0
+                );
+            }
+        }
+
+        // Handle global_country
+        if (customerData.CustomerNationality) {
+            // Check if the nationality already exists in the global_country table
+            const countryExists = await globalCountryModel.getGlobalCountryByCountry(customerData.CustomerNationality);
+
+            if (!countryExists) {
+                // Create the nationality only if it doesn't exist
+                await globalCountryModel.createGlobalCountry(
+                    customerData.CustomerNationality,
+                    null,
+                    'Developer',
+                    new Date(),
+                    null,
+                    null,
+                    0
+                );
+            }
+        }
+
+        // Handle global_email
+        if (customerData.CustomerEmail) {
+            // Check if the email already exists in the global_email table
+            const emailExists = await globalEmailModel.getGlobalEmailByEmail(customerData.CustomerEmail);
+
+            if (!emailExists) {
+                // Create the email only if it doesn't exist
+                await globalEmailModel.createGlobalEmail(
+                    customerData.CustomerEmail,
+                    null,
+                    'Developer',
+                    new Date(),
+                    null,
+                    null,
+                    0
+                );
+            }
+        }
+
+        // Then, proceed with the INSERT operation in the customers table
         const query = `
             INSERT INTO DW_STUDENT.customers (
                 CustomerUUID,
@@ -73,7 +162,7 @@ async function createCustomer(customerData) {
             customerData.CustomerSalutation,
             customerData.CustomerOccupation,
             customerData.CustomerNationality,
-            customerData.CustomerAddress,
+            addressUUID,
             customerData.CustomerAddress2,
             customerData.CustomerAddress3,
             customerData.CustomerDateOfBirth,
@@ -108,14 +197,10 @@ async function checkForeignKeyConstraints(customerData) {
         // Check each foreign key constraint
         if (customerData.CustomerLeadID && !(await existsInTable('leads', 'LeadUUID', customerData.CustomerLeadID))) return false;
         if (customerData.CustomerGender && !(await existsInTable('global_gender', 'Gender', customerData.CustomerGender))) return false;
-        if (customerData.CustomerNationality && !(await existsInTable('global_country', 'Country', customerData.CustomerNationality))) return false;
-        if (customerData.CustomerAddress && !(await existsInTable('global_address', 'AddressUUID', customerData.CustomerAddress))) return false;
         if (customerData.CustomerAddress2 && !(await existsInTable('global_address', 'AddressUUID', customerData.CustomerAddress2))) return false;
         if (customerData.CustomerAddress3 && !(await existsInTable('global_address', 'AddressUUID', customerData.CustomerAddress3))) return false;
         if (customerData.CustomerBeneficiaryID && !(await existsInTable('customer_beneficiary', 'BeneficiaryID', customerData.CustomerBeneficiaryID))) return false;
         if (customerData.CustomerEmergencyContactID && !(await existsInTable('customer_emergency', 'EmergencyID', customerData.CustomerEmergencyContactID))) return false;
-        if (customerData.CustomerContactNo && !(await existsInTable('global_contact', 'Contact', customerData.CustomerContactNo))) return false;
-        if (customerData.CustomerEmail && !(await existsInTable('global_email', 'Email', customerData.CustomerEmail))) return false;
         if (customerData.CustomerMaritalStatus && !(await existsInTable('global_marital_status', 'MaritalStatus', customerData.CustomerMaritalStatus))) return false;
         if (customerData.CustomerRace && !(await existsInTable('global_race', 'Race', customerData.CustomerRace))) return false;
         if (customerData.CustomerPreferredLanguage && !(await existsInTable('global_language', 'Language', customerData.CustomerPreferredLanguage))) return false;
@@ -159,7 +244,18 @@ async function updateCustomer(customerId, customerData) {
 async function deleteCustomer(customerId) {
     const connection = await db.connect();
     try {
+        // Delete associated records from global_address
+        await connection.execute(`DELETE FROM global_address WHERE AddressUUID = (SELECT CustomerAddress FROM customers WHERE CustomerUUID = ?)`, [customerId]);
+        
+        // Delete associated records from global_contact
+        await connection.execute(`DELETE FROM global_contact WHERE Contact = (SELECT CustomerContactNo FROM customers WHERE CustomerUUID = ?)`, [customerId]);
+        
+        // Delete associated records from global_email
+        await connection.execute(`DELETE FROM global_email WHERE Email = (SELECT CustomerEmail FROM customers WHERE CustomerUUID = ?)`, [customerId]);
+
+        // Delete the customer
         const [result] = await connection.execute(`DELETE FROM customers WHERE CustomerUUID = ?`, [customerId]);
+        
         return result;
     } catch (error) {
         console.error('Error deleting customer:', error);
@@ -194,5 +290,5 @@ module.exports = {
     getCustomer,
     updateCustomer,
     deleteCustomer,
-    listAllCustomers
+    listAllCustomers,
 };
