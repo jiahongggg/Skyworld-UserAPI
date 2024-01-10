@@ -1,5 +1,7 @@
 const leadModel = require('../models/leadModel');
 const { v4: uuidv4 } = require('uuid');
+const NodeCache = require('node-cache');
+const cache = new NodeCache({ stdTTL: 60 * 5 }); // Cache data for 5 minutes 
 
 // Define the default page size and maximum page size
 const DEFAULT_PAGE_SIZE = 10;
@@ -80,6 +82,16 @@ const deleteLead = async (req, res) => {
 
 const listAllLeads = async (req, res) => {
     try {
+        // Check if data is already in cache
+        const cacheKey = 'allLeads';
+        const cachedData = cache.get(cacheKey);
+
+        if (cachedData) {
+            console.log('Data retrieved from cache');
+            return res.status(200).json(cachedData);
+        }
+
+        // Data is not in cache, fetch it from the database
         // Extract pagination parameters from the request query, defaulting to page 1 and 10 records per page
         const pageNumber = parseInt(req.query.pageNumber) || 1;
         const pageSize = parseInt(req.query.pageSize) || DEFAULT_PAGE_SIZE;
@@ -88,6 +100,10 @@ const listAllLeads = async (req, res) => {
         const effectivePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
 
         const leads = await leadModel.listAllLeads(pageNumber, effectivePageSize);
+
+        // Store the data in cache for future requests
+        cache.set(cacheKey, leads);
+
         res.status(200).json(leads);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching leads', error: error.message });

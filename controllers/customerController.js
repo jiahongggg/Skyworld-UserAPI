@@ -1,7 +1,7 @@
 const customerModel = require('../models/customerModel');
 const { v4: uuidv4 } = require('uuid');
 const NodeCache = require('node-cache');
-const cache = new NodeCache({ stdTTL: 600 }); // Cache results for 10 minutes
+const cache = new NodeCache({ stdTTL: 60 * 5 }); // Cache data for 5 minutes
 
 // Define the default page size and maximum page size
 const DEFAULT_PAGE_SIZE = 10;

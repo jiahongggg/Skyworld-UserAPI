@@ -4,6 +4,8 @@ const userApiCollectionGroupModel = require('../models/userApiCollectionGroupMod
 const apiCollectionGroupsModel = require('../models/apiCollectionGroupsModel');
 const { validationResult, check } = require('express-validator');
 const { v4: uuidv4 } = require('uuid');
+const NodeCache = require('node-cache'); // Import the caching library
+const cache = new NodeCache({ stdTTL: 60 * 5 }); // Cache data for 5 minutes
 
 // Helper function for input validation
 const validateUserInput = [
@@ -102,12 +104,27 @@ const deleteUser = async (req, res) => {
 // List all users
 const listUsers = async (req, res) => {
   try {
+    // Check if user list is already in cache
+    const cacheKey = 'allUsers';
+    const cachedUsers = cache.get(cacheKey);
+    
+    if (cachedUsers) {
+      console.log('User list retrieved from cache');
+      return res.json(cachedUsers);
+    }
+    
+    // User list is not in cache, fetch from the database
     const users = await userModel.listAllUsers();
+    
     // Exclude sensitive fields from the results
     const usersWithoutSensitiveInfo = users.map((user) => {
       const { password, refresh_token, ...userWithoutSensitiveFields } = user;
       return userWithoutSensitiveFields;
     });
+    
+    // Cache the user list
+    cache.set(cacheKey, usersWithoutSensitiveInfo);
+    
     res.json(usersWithoutSensitiveInfo);
   } catch (error) {
     res.status(500).json({ message: 'Internal server error', error: error.message });
@@ -151,16 +168,6 @@ const createApiCollectionGroup = async (req, res) => {
   }
 };
 
-// Function to list all API collection groups
-// const listApiCollectionGroups = async (req, res) => {
-//   try {
-//     const groups = await apiCollectionGroupsModel.listAllGroups();
-//     res.json(groups);
-//   } catch (error) {
-//     res.status(500).json({ message: 'Internal server error', error: error.message });
-//   }
-// };
-
 module.exports = {
   createUser: [validateUserInput, createUser],
   getUserDetails,
@@ -170,5 +177,4 @@ module.exports = {
   assignApiCollectionGroupToUser,
   listUserApiCollectionGroups,
   createApiCollectionGroup,
-  // listApiCollectionGroups,
 };
