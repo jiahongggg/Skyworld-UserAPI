@@ -36,7 +36,7 @@ const createLead = async (req, res) => {
             LeadIsExistingBuyer: req.body.LeadIsExistingBuyer,
             LeadTag: req.body.LeadTag,
             Remark: req.body.Remark,
-            CreatedBy: 'Developer',
+            CreatedBy: req.user.id,
             DateCreated: new Date(),
             ModifiedBy: null,
             DateModified: null,

@@ -42,7 +42,7 @@ const createCustomer = async (req, res) => {
             CustomerMotherMaidenName: req.body.CustomerMotherMaidenName,
             CustomerEmergencyContactID: req.body.CustomerEmergencyContactID,
             Remark: req.body.Remark,
-            CreatedBy: 'Developer',
+            CreatedBy: req.user.id,
             DateCreated: new Date(),
             ModifiedBy: null,
             DateModified: null,
