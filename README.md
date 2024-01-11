@@ -1,55 +1,55 @@
 # SkyWorld User API
 
-The SkyWorld User API, a Node.js-based RESTful service, follows the MVC pattern. It facilitates user authentication, management, and token operations, offering CRUD functionalities for user accounts
+The SkyWorld User API is a Node.js-based RESTful service that follows the MVC pattern. It provides functionalities for user authentication, management, and token operations, including CRUD operations for user accounts.
 
 ## Table of Contents
 
 - [Getting Started](#getting-started)
-- [Dependencies](#Dependencies)
+- [Dependencies](#dependencies)
 - [API Endpoints](#api-endpoints)
 - [Middleware](#middleware)
 
 ## Getting Started
 
-1. **Clone the Repository:**
+### 1. Clone the Repository
 
-   ```bash
-   git clone https://github.com/jiahongggg/Skyworld-UserAPI.git
-    ```
+```bash
+git clone https://github.com/jiahongggg/Skyworld-UserAPI.git
+```
 
-2. **Install Dependencies:**
+### 2. Install Dependencies
 
-    ```bash
-    npm install
-    ```
+```bash
+npm install
+```
 
-3. **Set Up Environment Variables:**
+### 3. Set Up Environment Variables
 
-    Create a .env file in the root directory with the following content:
+Create a `.env` file in the root directory with the following content:
 
-    ```bash
-    NODE_ENV=development
-    PORT=3000
-    MYSQL_HOST=<your-mysql-host>
-    MYSQL_PORT=<your-mysql-port>
-    MYSQL_DATABASE=<your-mysql-database>
-    MYSQL_USER=<your-mysql-username>
-    MYSQL_PASSWORD=<your-mysql-password>
-    JWT_SECRET=<your-jwt-secret>
-    JWT_REFRESH_SECRET=<your-jwt-refresh-secret>
-    ```
+```bash
+NODE_ENV=development
+PORT=3000
+MYSQL_HOST=<your-mysql-host>
+MYSQL_PORT=<your-mysql-port>
+MYSQL_DATABASE=<your-mysql-database>
+MYSQL_USER=<your-mysql-username>
+MYSQL_PASSWORD=<your-mysql-password>
+JWT_SECRET=<your-jwt-secret>
+JWT_REFRESH_SECRET=<your-jwt-refresh-secret>
+```
 
-4. **Run the Application:**
+### 4. Run the Application
 
-    ```bash
-    npm start
-    ```
-    
-    The API should now be running on the specified port (default: 3000).
+```bash
+npm start
+```
+
+The API should now be running on the specified port (default: 3000).
 
 ## Dependencies
 
-### The SkyWorld User API relies on the following dependencies:
+The SkyWorld User API relies on the following dependencies:
 
 - **bcryptjs**: Password hashing library for user authentication.
 - **cookie-parser**: Middleware for handling HTTP cookies.
@@ -72,9 +72,11 @@ The SkyWorld User API, a Node.js-based RESTful service, follows the MVC pattern.
 - **nodemon**: Development dependency for automatic server restarting during development.
 - **supertest**: Library for testing HTTP assertions.
 
-    ```bash
-    npm install bcryptjs cookie-parser crypto dotenv express express-rate-limit express-validator helmet jest jsonwebtoken morgan mysql2 mysql2-promise node-cache nodemon supertest uuid --save
-    ```
+To install these dependencies, run the following command:
+
+```bash
+npm install bcryptjs cookie-parser crypto dotenv express express-rate-limit express-validator helmet jest jsonwebtoken morgan mysql2 mysql2-promise node-cache nodemon supertest uuid --save
+```
 
 ## API Endpoints
 
@@ -116,14 +118,18 @@ The SkyWorld User API, a Node.js-based RESTful service, follows the MVC pattern.
 - PUT `/api/v1/sales/:id`: Updates sales record details for a specific record by its ID. Requires admin or editor privileges to update sales record details. Input validation is applied to ensure valid updates.
 - DELETE `/api/v1/sales/:id`: Deletes a specific sales record by its ID. Requires admin privileges to delete sales records.
 
-
 ## Middleware
 
 ### authMiddleware.js
 
-- Provides middleware for token verification (verifyToken) and role-based access control (checkAccess).
+This module provides middleware for token verification (`verifyToken`) and role-based access control (`checkAccess`).
 
+- `verifyToken`: Middleware for verifying JWT tokens. It checks if a valid token is provided in the `Authorization` header and decodes it using the JWT secret from the environment variables. If the token is valid, it attaches the user information to the request (`req.user`).
 
+- `checkAccess`: Middleware for controlling access based on user roles. It takes an array of allowed roles and checks if the user's role is included in the array. If the user's role matches one of the allowed roles, the request proceeds; otherwise, it returns a 403 Forbidden response.
 
+- `checkApiAccess`: Middleware for checking API access based on user API collection groups. It takes the required API group name and checks if the user has access to it by comparing the user's API collection groups with the group name
 
+ mapping. If the user has access, the request proceeds; otherwise, it returns a 403 Forbidden response.
 
+These middleware functions are crucial for ensuring authentication, role-based authorization, and API access control within the Skyworld User API. They help secure your routes and protect sensitive data from unauthorized access.
