@@ -8,11 +8,6 @@ The SkyWorld User API, a Node.js-based RESTful service, follows the MVC pattern.
 - [Dependencies](#Dependencies)
 - [API Endpoints](#api-endpoints)
 - [Middleware](#middleware)
-- [Models](#models)
-- [Controllers](#controllers)
-- [Database](#database)
-- [Application Entry Point](#application-entry-point)
-- [Contact](#contact)
 
 ## Getting Started
 
@@ -49,88 +44,84 @@ The SkyWorld User API, a Node.js-based RESTful service, follows the MVC pattern.
     ```bash
     npm start
     ```
-
+    
     The API should now be running on the specified port (default: 3000).
 
 ## Dependencies
 
 ### The SkyWorld User API relies on the following dependencies:
 
-- `bcryptjs`: Password hashing library for user authentication.
-- `cookie-parser`: Middleware for handling HTTP cookies.
-- `crypto`: Node.js module for cryptographic functionality.
-- `dotenv`: Module for loading environment variables from a .env file.
-- `express`: Web application framework for Node.js.
-- `express-rate-limit`: Middleware for rate-limiting HTTP requests.
-- `express-validator`: Middleware for request data validation.
-- `helmet`: Middleware for securing your Express apps by setting various HTTP headers.
-- `jsonwebtoken`: Library for creating and verifying JSON Web Tokens (JWT).
-- `jest`: JavaScript testing framework.
-- `morgan`: Middleware for HTTP request/response logging.
-- `mysql2`: MySQL database driver for Node.js.
-- `mysql2-promise`: Promise-based wrapper for the MySQL 2 package.
-- `nodemon`: Development dependency for automatic server restarting during development.
-- `supertest`: Library for testing HTTP assertions.
-- `uuid`: Library for generating UUIDs (Universally Unique Identifiers).
+- **bcryptjs**: Password hashing library for user authentication.
+- **cookie-parser**: Middleware for handling HTTP cookies.
+- **crypto**: Node.js module for cryptographic functionality.
+- **dotenv**: Module for loading environment variables from a .env file.
+- **express**: Web application framework for Node.js.
+- **express-rate-limit**: Middleware for rate-limiting HTTP requests.
+- **express-validator**: Middleware for request data validation.
+- **helmet**: Middleware for securing your Express apps by setting various HTTP headers.
+- **jsonwebtoken**: Library for creating and verifying JSON Web Tokens (JWT).
+- **morgan**: Middleware for HTTP request/response logging.
+- **mysql2**: MySQL database driver for Node.js.
+- **mysql2-promise**: Promise-based wrapper for the MySQL 2 package.
+- **node-cache**: Library for caching data in Node.js applications.
+- **uuid**: Library for generating UUIDs (Universally Unique Identifiers).
+
+#### Development Dependencies
+
+- **jest**: JavaScript testing framework for unit and integration tests.
+- **nodemon**: Development dependency for automatic server restarting during development.
+- **supertest**: Library for testing HTTP assertions.
 
     ```bash
-    npm install bcryptjs cookie-parser crypto dotenv express express-rate-limit express-validator helmet jest jsonwebtoken morgan mysql2 mysql2-promise nodemon supertest uuid --save
+    npm install bcryptjs cookie-parser crypto dotenv express express-rate-limit express-validator helmet jest jsonwebtoken morgan mysql2 mysql2-promise node-cache nodemon supertest uuid --save
     ```
 
 ## API Endpoints
 
 ### Authentication
 
-- POST `/api/v1/users/login`: Logs in a user and provides an access token.
-Rate-limited to prevent brute-force attacks.
-Requires a valid username and password in the request body.
-- POST `/api/v1/users/refresh`: Refreshes the access token using a valid refresh token stored in an HTTP-only cookie.
-Requires a valid refresh token in the cookie.
+- POST `/api/v1/users/login`: Logs in a user and provides an access token. Rate-limited to prevent brute-force attacks. Requires a valid username and password in the request body.
+- POST `/api/v1/users/refresh`: Refreshes the access token using a valid refresh token stored in an HTTP-only cookie. Requires a valid refresh token in the cookie.
 - POST `/api/v1/users/logout`: Logs out the user by clearing the refresh token cookie.
 
 ### User Management
-- POST `/api/v1/users`: Creates a new user with the specified username, password, and role.
-Requires admin privileges to create users. Input validation is applied to ensure a valid username, password, and role.
+
+- POST `/api/v1/users`: Creates a new user with the specified username, password, and role. Requires admin privileges to create users. Input validation is applied to ensure a valid username, password, and role.
 - GET `/api/v1/users`: Lists all users. Requires admin or editor privileges to view the user list.
 - GET `/api/v1/users/:id`: Retrieves details of a specific user by their ID. Requires admin or editor privileges to view user details.
 - PUT `/api/v1/users/:id`: Updates user details (username, password, role) for a specific user by their ID. Requires admin or editor privileges to update user details. Input validation is applied to ensure valid updates.
 - DELETE `/api/v1/users/:id`: Deletes a specific user by their ID. Requires admin privileges to delete users.
+
+### Customer Management
+
+- POST `/api/v1/customers`: Creates a new customer with the specified details. Requires admin or editor privileges to create customers. Input validation is applied to ensure valid customer creation.
+- GET `/api/v1/customers`: Lists all customers. Anyone with access to the API can view the customer list.
+- GET `/api/v1/customers/:id`: Retrieves details of a specific customer by their ID. Anyone with access to the API can view customer details.
+- PUT `/api/v1/customers/:id`: Updates customer details for a specific customer by their ID. Requires admin or editor privileges to update customer details. Input validation is applied to ensure valid updates.
+- DELETE `/api/v1/customers/:id`: Deletes a specific customer by their ID. Requires admin privileges to delete customers.
+
+### Lead Management
+
+- POST `/api/v1/leads`: Creates a new lead with the specified details. Requires admin or editor privileges to create leads. Input validation is applied to ensure valid lead creation.
+- GET `/api/v1/leads`: Lists all leads. Anyone with access to the API can view the lead list.
+- GET `/api/v1/leads/:id`: Retrieves details of a specific lead by their ID. Anyone with access to the API can view lead details.
+- PUT `/api/v1/leads/:id`: Updates lead details for a specific lead by their ID. Requires admin or editor privileges to update lead details. Input validation is applied to ensure valid updates.
+- DELETE `/api/v1/leads/:id`: Deletes a specific lead by their ID. Requires admin privileges to delete leads.
+
+### Sales Management
+
+- POST `/api/v1/sales`: Creates a new sales record with the specified details. Requires admin or editor privileges to create sales records. Input validation is applied to ensure valid sales record creation.
+- GET `/api/v1/sales`: Lists all sales records. Anyone with access to the API can view the sales record list.
+- GET `/api/v1/sales/:id`: Retrieves details of a specific sales record by its ID. Anyone with access to the API can view sales record details.
+- PUT `/api/v1/sales/:id`: Updates sales record details for a specific record by its ID. Requires admin or editor privileges to update sales record details. Input validation is applied to ensure valid updates.
+- DELETE `/api/v1/sales/:id`: Deletes a specific sales record by its ID. Requires admin privileges to delete sales records.
+
 
 ## Middleware
 
 ### authMiddleware.js
 
 - Provides middleware for token verification (verifyToken) and role-based access control (checkAccess).
-
-## Models
-
-### userModel.js
-- Defines functions for user-related database operations such as creating, retrieving, updating, and deleting users.
-
-## Controllers
-
-### authController.js
-- Contains functions for user authentication, token generation, and logout.
-
-### userApiController.js
-- Handles user-related actions such as creating, retrieving, updating, and deleting users.
-
-## Database
-
-### db.js
-- Handles database connection and exports a connection pool.
-
-## Application Entry Point
-
-### app.js
-- The main application entry point, which sets up the Express app, connects to the database, and defines routes.
-- Handles database connection and exports a connection pool.
-
-## Contact
-
-For inquiries or further information, please contact me at:
-
-- [Jia Hong](jiahong.sim01@gmail.com)
 
 
 
