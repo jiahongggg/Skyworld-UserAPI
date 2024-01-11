@@ -128,8 +128,6 @@ This module provides middleware for token verification (`verifyToken`) and role-
 
 - `checkAccess`: Middleware for controlling access based on user roles. It takes an array of allowed roles and checks if the user's role is included in the array. If the user's role matches one of the allowed roles, the request proceeds; otherwise, it returns a 403 Forbidden response.
 
-- `checkApiAccess`: Middleware for checking API access based on user API collection groups. It takes the required API group name and checks if the user has access to it by comparing the user's API collection groups with the group name
-
- mapping. If the user has access, the request proceeds; otherwise, it returns a 403 Forbidden response.
+- `checkApiAccess`: Middleware for checking API access based on user API collection groups. It takes the required API group name and checks if the user has access to it by comparing the user's API collection groups with the group name mapping. If the user has access, the request proceeds; otherwise, it returns a 403 Forbidden response.
 
 These middleware functions are crucial for ensuring authentication, role-based authorization, and API access control within the Skyworld User API. They help secure your routes and protect sensitive data from unauthorized access.
