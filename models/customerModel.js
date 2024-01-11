@@ -246,16 +246,16 @@ async function deleteCustomer(customerId) {
     try {
         // Delete associated records from global_address
         await connection.execute(`DELETE FROM global_address WHERE AddressUUID = (SELECT CustomerAddress FROM customers WHERE CustomerUUID = ?)`, [customerId]);
-        
+
         // Delete associated records from global_contact
         await connection.execute(`DELETE FROM global_contact WHERE Contact = (SELECT CustomerContactNo FROM customers WHERE CustomerUUID = ?)`, [customerId]);
-        
+
         // Delete associated records from global_email
         await connection.execute(`DELETE FROM global_email WHERE Email = (SELECT CustomerEmail FROM customers WHERE CustomerUUID = ?)`, [customerId]);
 
         // Delete the customer
         const [result] = await connection.execute(`DELETE FROM customers WHERE CustomerUUID = ?`, [customerId]);
-        
+
         return result;
     } catch (error) {
         console.error('Error deleting customer:', error);
@@ -265,17 +265,52 @@ async function deleteCustomer(customerId) {
     }
 }
 
-async function listAllCustomers(pageNumber = 1, pageSize = 10) {
+async function listAllCustomers(pageNumber = 1, pageSize = 10, filter = {}, sort = {}) {
     // Ensure pageNumber and pageSize are integers
     pageNumber = parseInt(pageNumber);
     pageSize = parseInt(pageSize);
-    
+
     const connection = await db.connect();
 
     console.log(`Executing query with pageSize: ${pageSize}, offset: ${(pageNumber - 1) * pageSize}`);
 
     try {
-        const [rows] = await connection.execute(`SELECT * FROM customers LIMIT ${pageSize} OFFSET ${(pageNumber - 1) * pageSize}`);
+        // Build the WHERE clause for filtering based on the filter object
+        let whereClause = '';
+        const filterKeys = Object.keys(filter);
+        if (filterKeys.length > 0) {
+            whereClause = 'WHERE ';
+            filterKeys.forEach((key, index) => {
+                whereClause += `${key} = ?`;
+                if (index < filterKeys.length - 1) {
+                    whereClause += ' AND ';
+                }
+            });
+        }
+
+        // Build the ORDER BY clause for sorting based on the sort object
+        let orderByClause = '';
+        const sortKeys = Object.keys(sort);
+        if (sortKeys.length > 0) {
+            orderByClause = 'ORDER BY ';
+            sortKeys.forEach((key, index) => {
+                orderByClause += `${key} ${sort[key] === 1 ? 'ASC' : 'DESC'}`;
+                if (index < sortKeys.length - 1) {
+                    orderByClause += ', ';
+                }
+            });
+        }
+
+        const query = `
+            SELECT * FROM customers
+            ${whereClause}
+            ${orderByClause}
+            LIMIT ${pageSize}
+            OFFSET ${(pageNumber - 1) * pageSize}
+        `;
+
+        const [rows] = await connection.execute(query, Object.values(filter));
+
         return rows;
     } catch (error) {
         console.error('Error executing query:', error);

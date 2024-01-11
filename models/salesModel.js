@@ -3,11 +3,11 @@ const mysql = require('mysql2');
 const { v4: uuidv4 } = require('uuid');
 const globalAddressModel = require('./globalAddressModel');
 const globalContactModel = require('./globalContactModel');
-const globalCountryModel = require('./globalCountryModel');
 const globalEmailModel = require('./globalEmailModel');
 
 async function existsInTable(table, column, value) {
   const connection = await db.connect();
+  
   try {
     const query = `
       SELECT COUNT(*) as count
@@ -162,6 +162,7 @@ async function checkForeignKeyConstraints(salesData) {
 
 async function getSales(salesAgentID) {
   const connection = await db.connect();
+  
   try {
     const [rows] = await connection.execute(`SELECT * FROM sales WHERE SalesAgentID = ?`, [salesAgentID]);
     return rows[0];
@@ -172,6 +173,7 @@ async function getSales(salesAgentID) {
 
 async function updateSales(salesAgentID, salesData) {
   const connection = await db.connect();
+  
   try {
     const updateColumns = Object.keys(salesData).map(column => `${column} = ?`).join(', ');
     const updateValues = Object.values(salesData);
@@ -190,6 +192,7 @@ async function updateSales(salesAgentID, salesData) {
 
 async function deleteSales(salesAgentID) {
   const connection = await db.connect();
+  
   try {
     // Delete associated records from global_address
     await connection.execute(
@@ -221,7 +224,7 @@ async function deleteSales(salesAgentID) {
   }
 }
 
-async function listAllSales(pageNumber = 1, pageSize = 10) {
+async function listAllSales(pageNumber = 1, pageSize = 10, filter = {}, sorting = '') {
   // Ensure pageNumber and pageSize are integers
   pageNumber = parseInt(pageNumber);
   pageSize = parseInt(pageSize);
@@ -232,8 +235,35 @@ async function listAllSales(pageNumber = 1, pageSize = 10) {
   console.log(`Executing query with pageSize: ${pageSize}, offset: ${offset}`);
 
   try {
-    const query = `SELECT * FROM sales LIMIT ${pageSize} OFFSET ${offset}`;
-    const [rows] = await connection.execute(query);
+    // Build the WHERE clause for filtering based on the filter object
+    let whereClause = '';
+    const filterKeys = Object.keys(filter);
+    if (filterKeys.length > 0) {
+      whereClause = 'WHERE ';
+      filterKeys.forEach((key, index) => {
+        whereClause += `${key} = ?`;
+        if (index < filterKeys.length - 1) {
+          whereClause += ' AND ';
+        }
+      });
+    }
+
+    // Build the ORDER BY clause for sorting based on the sorting string
+    let orderByClause = '';
+    if (sorting) {
+      orderByClause = `ORDER BY ${sorting}`;
+    }
+
+    const query = `
+      SELECT *
+      FROM sales
+      ${whereClause}
+      ${orderByClause}
+      LIMIT ${pageSize}
+      OFFSET ${offset}
+    `;
+
+    const [rows] = await connection.execute(query, Object.values(filter));
     return rows;
   } catch (error) {
     console.error('Error executing query:', error);

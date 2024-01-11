@@ -145,7 +145,7 @@ async function createLead(leadData) {
                 ModifiedBy,
                 DateModified,
                 Deleted
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
@@ -258,7 +258,7 @@ async function deleteLead(leadId) {
     }
 }
 
-async function listAllLeads(pageNumber = 1, pageSize = 10) {
+async function listAllLeads(pageNumber = 1, pageSize = 10, filters = {}, sorting = 'LeadName ASC') {
     // Ensure pageNumber and pageSize are integers
     pageNumber = parseInt(pageNumber);
     pageSize = parseInt(pageSize);
@@ -269,8 +269,34 @@ async function listAllLeads(pageNumber = 1, pageSize = 10) {
     console.log(`Executing query with pageSize: ${pageSize}, offset: ${offset}`);
 
     try {
-        const query = `SELECT * FROM leads LIMIT ${pageSize} OFFSET ${offset}`;
-        const [rows] = await connection.execute(query);
+        // Build the WHERE clause for filtering based on the filter object
+        let whereClause = '';
+        const filterKeys = Object.keys(filters);
+        if (filterKeys.length > 0) {
+            whereClause = ' WHERE ';
+            filterKeys.forEach((key, index) => {
+                whereClause += `${key} = ?`;
+                if (index < filterKeys.length - 1) {
+                    whereClause += ' AND ';
+                }
+            });
+        }
+
+        // Build the ORDER BY clause for sorting based on the sorting parameter
+        let orderByClause = '';
+        if (sorting) {
+            orderByClause = ` ORDER BY ${sorting}`;
+        }
+
+        const query = `
+            SELECT * FROM leads
+            ${whereClause}
+            ${orderByClause}
+            LIMIT ${pageSize}
+            OFFSET ${offset}
+        `;
+
+        const [rows] = await connection.execute(query, Object.values(filters));
         return rows;
     } catch (error) {
         console.error('Error executing query:', error);

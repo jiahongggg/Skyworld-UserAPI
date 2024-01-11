@@ -52,7 +52,6 @@ const createCustomer = async (req, res) => {
         // Create customer with checking foreign key constraints
         const result = await customerModel.createCustomer(customerData);
 
-
         res.status(201).send({ message: 'Customer created successfully', CustomerUUID: customerData.CustomerUUID });
     } catch (error) {
         res.status(500).send({ message: 'Error creating customer', error: error.message });
@@ -95,23 +94,37 @@ const listAllCustomers = async (req, res) => {
         // Ensure pageSize is within limits
         const effectivePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
 
-        // Create a cache key based on the query parameters
-        const cacheKey = `listAllCustomers:${pageNumber}:${effectivePageSize}`;
+        // Create a cache key based on the query parameters, including filtering and sorting
+        const cacheKey = `listAllCustomers:${pageNumber}:${effectivePageSize}:${JSON.stringify(req.query)}`;
 
         // Check if the data is cached
         const cachedData = cache.get(cacheKey);
 
         if (cachedData) {
-            // If cached data exists, return it
             res.status(200).json(cachedData);
         } else {
-            // If data is not cached, fetch it from the database
-            const customers = await customerModel.listAllCustomers(pageNumber, effectivePageSize);
+            const filter = {};
+            const sort = {};
 
-            // Store the data in the cache
+            // Extract filtering and sorting parameters from the request query
+            if (req.query.filterByName) {
+                filter.CustomerName = req.query.filterByName;
+            }
+
+            if (req.query.sortBy) {
+                sort.CustomerName = req.query.sortBy === 'asc' ? 1 : -1;
+            }
+
+            // Fetch customers from the database with optional filtering and sorting
+            const customers = await customerModel.listAllCustomers(
+                pageNumber,
+                effectivePageSize,
+                filter,
+                sort
+            );
+
             cache.set(cacheKey, customers);
 
-            // Send the data to the client
             res.status(200).json(customers);
         }
     } catch (error) {
