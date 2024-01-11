@@ -53,18 +53,23 @@ The SkyWorld User API relies on the following dependencies:
 
 - **bcryptjs**: Password hashing library for user authentication.
 - **cookie-parser**: Middleware for handling HTTP cookies.
+- **cors**: Middleware for handling Cross-Origin Resource Sharing (CORS).
 - **crypto**: Node.js module for cryptographic functionality.
 - **dotenv**: Module for loading environment variables from a .env file.
 - **express**: Web application framework for Node.js.
 - **express-rate-limit**: Middleware for rate-limiting HTTP requests.
 - **express-validator**: Middleware for request data validation.
+- **express-winston**: Middleware for logging with Winston in Express applications.
 - **helmet**: Middleware for securing your Express apps by setting various HTTP headers.
 - **jsonwebtoken**: Library for creating and verifying JSON Web Tokens (JWT).
+- **mongodb**: MongoDB driver for Node.js.
 - **morgan**: Middleware for HTTP request/response logging.
 - **mysql2**: MySQL database driver for Node.js.
 - **mysql2-promise**: Promise-based wrapper for the MySQL 2 package.
 - **node-cache**: Library for caching data in Node.js applications.
 - **uuid**: Library for generating UUIDs (Universally Unique Identifiers).
+- **winston**: A logger library for Node.js.
+- **winston-mongodb**: Winston transport for MongoDB.
 
 #### Development Dependencies
 
@@ -72,10 +77,12 @@ The SkyWorld User API relies on the following dependencies:
 - **nodemon**: Development dependency for automatic server restarting during development.
 - **supertest**: Library for testing HTTP assertions.
 
+## Installation
+
 To install these dependencies, run the following command:
 
 ```bash
-npm install bcryptjs cookie-parser crypto dotenv express express-rate-limit express-validator helmet jest jsonwebtoken morgan mysql2 mysql2-promise node-cache nodemon supertest uuid --save
+npm install bcryptjs cookie-parser cors crypto dotenv express express-rate-limit express-validator express-winston helmet jsonwebtoken mongodb morgan mysql2 mysql2-promise node-cache uuid winston winston-mongodb --save
 ```
 
 ## API Endpoints

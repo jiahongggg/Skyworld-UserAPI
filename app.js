@@ -1,11 +1,21 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const expressWinston = require('express-winston');
 const db = require('./models/db');
+const logger = require('./logger');
+require('dotenv').config();
 
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 app.use(cookieParser());
+
+app.use(expressWinston.logger({
+  winstonInstance: logger,
+  msg: "HTTP {{req.method}} {{req.url}} {{req.user.id}}",
+}));
 
 // Define a root route for testing
 app.get('/', (req, res) => {
@@ -29,8 +39,8 @@ const connectDbAndGetApp = async () => {
     });
     return app;
   } catch (err) {
-    console.error("Error connecting to MySQL database: ", err);
-    throw err; // This will be caught in server.js
+    logger.error("Error connecting to MySQL database: " + err.message);
+    throw err;
   }
 };
 
