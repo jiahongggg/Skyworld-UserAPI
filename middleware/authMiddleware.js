@@ -36,9 +36,9 @@ const checkAccess = (allowedRoles) => {
 const checkApiAccess = (requiredApiGroupName) => {
   return async (req, res, next) => {
     try {
-      const userUUID = req.user.id; 
-      const userApiGroups = await userApiCollectionGroupModel.getUserApiGroups(userUUID);   
-      console.log('User API Groups:', userApiGroups); 
+      const userUUID = req.user.id;
+      const userApiGroups = await userApiCollectionGroupModel.getUserApiGroups(userUUID);
+      console.log('User API Groups:', userApiGroups);
       const groupNameMapping = await apiCollectionGroupsModel.getApiGroupNameMapping();
       console.log('Group Name Mapping:', groupNameMapping);
 

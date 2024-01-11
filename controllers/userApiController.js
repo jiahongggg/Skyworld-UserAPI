@@ -44,7 +44,7 @@ const createUser = async (req, res) => {
 // Read user details
 const getUserDetails = async (req, res) => {
   try {
-    const user = await userModel.findUserById(req.params.id); 
+    const user = await userModel.findUserById(req.params.id);
     console.log(`User details retrieved: ID ${req.params.id}`); // Audit log
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -107,24 +107,24 @@ const listUsers = async (req, res) => {
     // Check if user list is already in cache
     const cacheKey = 'allUsers';
     const cachedUsers = cache.get(cacheKey);
-    
+
     if (cachedUsers) {
       console.log('User list retrieved from cache');
       return res.json(cachedUsers);
     }
-    
+
     // User list is not in cache, fetch from the database
     const users = await userModel.listAllUsers();
-    
+
     // Exclude sensitive fields from the results
     const usersWithoutSensitiveInfo = users.map((user) => {
       const { password, refresh_token, ...userWithoutSensitiveFields } = user;
       return userWithoutSensitiveFields;
     });
-    
+
     // Cache the user list
     cache.set(cacheKey, usersWithoutSensitiveInfo);
-    
+
     res.json(usersWithoutSensitiveInfo);
   } catch (error) {
     res.status(500).json({ message: 'Internal server error', error: error.message });

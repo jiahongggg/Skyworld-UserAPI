@@ -30,8 +30,8 @@ const createSales = async (req, res) => {
             Deleted: 0,
             CreatedBy: req.user.id,
             DateCreated: new Date(),
-            ModifiedBy: null, 
-            DateModified: null 
+            ModifiedBy: null,
+            DateModified: null
         };
 
         await salesModel.createSales(salesData);
@@ -89,8 +89,8 @@ const listAllSales = async (req, res) => {
             return res.status(200).json(cachedData);
         }
 
-        const filter = {}; 
-        let sorting = ''; 
+        const filter = {};
+        let sorting = '';
 
         // Extract filtering and sorting parameters from the request query
         if (req.query.filterByGender) {

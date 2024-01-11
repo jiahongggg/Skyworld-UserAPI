@@ -25,7 +25,7 @@ router.route('/:id')
 
 router.route('/apiCollectionGroups')
   .post(checkAccess(['admin']), userApiController.createApiCollectionGroup);
-  // .get(checkAccess(['admin', 'editor']), userApiController.listApiCollectionGroups);
+// .get(checkAccess(['admin', 'editor']), userApiController.listApiCollectionGroups);
 
 router.route('/userApiCollectionGroup')
   .post(checkAccess(['admin']), userApiController.assignApiCollectionGroupToUser);

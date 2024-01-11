@@ -145,7 +145,7 @@ async function createLead(leadData) {
                 ModifiedBy,
                 DateModified,
                 Deleted
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
@@ -175,7 +175,7 @@ async function createLead(leadData) {
             leadData.ModifiedBy,
             leadData.DateModified,
             leadData.Deleted
-        ];        
+        ];
 
         await connection.execute(query, values);
     } catch (error) {
