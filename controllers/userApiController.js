@@ -145,8 +145,8 @@ const assignApiCollectionGroupToUser = async (req, res) => {
 // Function to list API collection groups for a user
 const listUserApiCollectionGroups = async (req, res) => {
   try {
-    const userUUID = req.params.id; // Get the user UUID from the request parameters
-    console.log(`test: ${req.params.id}`);
+    const userUUID = req.user.id; // Get the user UUID from the request parameters
+    console.log(`test: ${req.user.id}`);
     console.log(`Retrieving API collection groups for user ${userUUID}`);
     const groups = await userApiCollectionGroupModel.listGroupsForUser(userUUID);
 

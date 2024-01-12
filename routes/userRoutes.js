@@ -321,7 +321,10 @@ router.delete('/:id', checkAccess(['admin']), userApiController.deleteUser);
  *           schema:
  *             type: object
  *             properties:
- *               // Properties for creating API collection group
+ *                name:
+ *                 type: string
+ *                 example: "Test"
+ *                 description: "Name of the API collection group"
  *     responses:
  *       200:
  *         description: API collection group created successfully

@@ -18,7 +18,7 @@ router.use(checkApiAccess('leads'));
 
 /**
  * @swagger
- * /leads:
+ * /api/v1/leads:
  *   post:
  *     tags: [Leads]
  *     security:
@@ -40,7 +40,7 @@ router.post('/', checkAccess(['admin', 'editor']), leadController.createLead);
 
 /**
  * @swagger
- * /leads:
+ * /api/v1/leads:
  *   get:
  *     tags: [Leads]
  *     security:
@@ -56,7 +56,7 @@ router.get('/', leadController.listAllLeads);
 
 /**
  * @swagger
- * /leads/{id}:
+ * /api/v1/leads/{id}:
  *   get:
  *     tags: [Leads]
  *     security:
@@ -79,7 +79,7 @@ router.get('/:id', leadController.getLead);
 
 /**
  * @swagger
- * /leads/{id}:
+ * /api/v1/leads/{id}:
  *   put:
  *     tags: [Leads]
  *     security:
@@ -108,7 +108,7 @@ router.put('/:id', checkAccess(['admin', 'editor']), leadController.updateLead);
 
 /**
  * @swagger
- * /leads/{id}:
+ * /api/v1/leads/{id}:
  *   delete:
  *     tags: [Leads]
  *     security:

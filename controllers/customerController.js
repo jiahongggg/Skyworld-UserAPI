@@ -7,10 +7,15 @@ const cache = new NodeCache({ stdTTL: 60 * 5 }); // Cache data for 5 minutes
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 50;
 
-// Helper function to refresh the customer cache
-const refreshCustomerCache = async () => {
-    const customersData = await customerModel.listAllCustomers(); // Assuming this function exists in your customerModel
-    cache.set('listAllCustomers', customersData);
+// Invalidate cache for a specific customer
+const invalidateCustomerCache = (customerId) => {
+    const cacheKey = `getCustomer:${customerId}`;
+    cache.del(cacheKey);
+};
+
+// Invalidate all customer list cache entries
+const invalidateCustomerListCache = () => {
+    cache.flushAll();
 };
 
 const createCustomer = async (req, res) => {
@@ -56,10 +61,9 @@ const createCustomer = async (req, res) => {
         };
 
         // Create customer with checking foreign key constraints
-        const result = await customerModel.createCustomer(customerData);
+        await customerModel.createCustomer(customerData);
 
-        // Update the cache after creating a new customer record
-        await refreshCustomerCache();
+        invalidateCustomerListCache();
 
         res.status(201).send({ message: 'Customer created successfully', CustomerUUID: customerData.CustomerUUID });
     } catch (error) {
@@ -70,23 +74,20 @@ const createCustomer = async (req, res) => {
 const getCustomer = async (req, res) => {
     try {
         const customerId = req.params.id;
-
-        // Check if the data is cached
-        const cachedData = cache.get(`getCustomer:${customerId}`);
-
+        const cacheKey = `getCustomer:${customerId}`;
+        const cachedData = cache.get(cacheKey);
         if (cachedData) {
-            console.log('Data retrieved from cache');
             return res.status(200).json(cachedData);
         }
 
         const customer = await customerModel.getCustomer(customerId);
-
-        // Store the data in cache for future requests
-        cache.set(`getCustomer:${customerId}`, customer);
-
+        if (!customer) {
+            return res.status(404).json({ message: 'Customer not found' });
+        }
+        cache.set(cacheKey, customer);
         res.status(200).json(customer);
     } catch (error) {
-        res.status(404).json({ message: 'Customer not found' });
+        res.status(500).json({ message: 'Error fetching customer data', error: error.message });
     }
 };
 
@@ -96,8 +97,7 @@ const updateCustomer = async (req, res) => {
 
         const result = await customerModel.updateCustomer(customerId, req.body);
 
-        // Update the cache after creating a new customer record
-        await refreshCustomerCache();
+        invalidateCustomerCache(customerId);
 
         res.status(200).json(result);
     } catch (error) {
@@ -111,8 +111,7 @@ const deleteCustomer = async (req, res) => {
 
         const result = await customerModel.deleteCustomer(customerId);
 
-        // Update the cache after creating a new customer record
-        await refreshCustomerCache();
+        invalidateCustomerCache(customerId);
 
         res.status(200).json({ message: 'Customer deleted', result });
     } catch (error) {
@@ -122,51 +121,13 @@ const deleteCustomer = async (req, res) => {
 
 const listAllCustomers = async (req, res) => {
     try {
-        // Extract pagination parameters from the request query, defaulting to page 1 and 10 records per page
         const pageNumber = parseInt(req.query.pageNumber) || 1;
-        const pageSize = parseInt(req.query.pageSize) || DEFAULT_PAGE_SIZE;
-
-        // Ensure pageSize is within limits
-        const effectivePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
-
-        // Create a cache key based on the query parameters, including filtering and sorting
-        const cacheKey = `listAllCustomers:${pageNumber}:${effectivePageSize}:${JSON.stringify(req.query)}`;
-
-        // Check if the data is cached
-        const cachedData = cache.get(cacheKey);
-
-        if (cachedData) {
-            console.log('Data retrieved from cache');
-            return res.status(200).json(cachedData);
-        }
-
-        const filter = {};
-        const sort = {};
-
-        // Extract filtering and sorting parameters from the request query
-        if (req.query.filterByName) {
-            filter.CustomerName = req.query.filterByName;
-        }
-
-        if (req.query.sortBy) {
-            // Parse the sorting parameter to determine column and order
-            sort.CustomerName = req.query.sortBy === 'asc' ? 1 : -1;
-        }
-
-        // Fetch customers from the database with optional filtering and sorting
-        const customers = await customerModel.listAllCustomers(
-            pageNumber,
-            effectivePageSize,
-            filter,
-            sort
-        );
-
-        // Store the data in cache for future requests
-        cache.set(cacheKey, customers);
+        const pageSize = Math.min(parseInt(req.query.pageSize) || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+        const customers = await customerModel.listAllCustomers(pageNumber, pageSize);
 
         res.status(200).json(customers);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching customers', error: error.message });
+        res.status(500).json({ message: 'Error fetching customer list', error: error.message });
     }
 };
 

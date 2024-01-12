@@ -7,10 +7,15 @@ const cache = new NodeCache({ stdTTL: 60 * 5 }); // Cache data for 5 minutes
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 50;
 
-// Helper function to refresh the sales cache
-const refreshSalesCache = async () => {
-    const salesData = await salesModel.listAllSales(); // Assuming this function exists in your salesModel
-    cache.set('listAllSales', salesData);
+// Invalidate cache for a specific sales
+const invalidateSalesCache = (salesId) => {
+    const cacheKey = `getSales:${salesId}`;
+    cache.del(cacheKey);
+};
+
+// Invalidate all sales list cache entries
+const invalidateSalesListCache = () => {
+    cache.flushAll();
 };
 
 const createSales = async (req, res) => {
@@ -42,8 +47,7 @@ const createSales = async (req, res) => {
 
         await salesModel.createSales(salesData);
 
-        // Update the cache after creating a new sales record
-        await refreshSalesCache();
+        invalidateSalesListCache();
 
         res.status(201).send({ message: 'Sales created successfully', SalesAgentID: salesData.SalesAgentID });
 
@@ -55,9 +59,8 @@ const createSales = async (req, res) => {
 const getSales = async (req, res) => {
     try {
         const salesId = req.params.id;
-
-        // Check if the data is cached
-        const cachedData = cache.get(`getSales:${salesId}`);
+        const cacheKey = `getSales:${salesId}`;
+        const cachedData = cache.get(cacheKey);
 
         if (cachedData) {
             console.log('Data retrieved from cache');
@@ -65,13 +68,13 @@ const getSales = async (req, res) => {
         }
 
         const sales = await salesModel.getSales(salesId);
-
-        // Store the data in cache for future requests
-        cache.set(`getSales:${salesId}`, sales);
-
+        if(!sales) {
+            return res.status(404).json({ message: 'Sales not found' });
+        }
+        cache.set(cacheKey, sales);
         res.status(200).json(sales);
     } catch (error) {
-        res.status(404).json({ message: 'Sales not found' });
+        res.status(404).json({ message: 'Error fetching sales data', error: error.message });
     }
 };
 
@@ -81,8 +84,7 @@ const updateSales = async (req, res) => {
 
         const result = await salesModel.updateSales(salesId, req.body);
 
-        // Update the cache after updating a sales record
-        await refreshSalesCache();
+        invalidateSalesCache(salesId);
 
         res.status(200).json(result);
     } catch (error) {
@@ -96,8 +98,7 @@ const deleteSales = async (req, res) => {
 
         const result = await salesModel.deleteSales(salesId);
 
-        // Refresh cache after deleting a sales record
-        await refreshSalesCache();
+        invalidateSalesCache(salesId);
 
         res.status(200).json({ message: 'Sales deleted', result });
     } catch (error) {
@@ -107,46 +108,9 @@ const deleteSales = async (req, res) => {
 
 const listAllSales = async (req, res) => {
     try {
-        // Extract pagination parameters from the request query, defaulting to page 1 and 10 records per page
         const pageNumber = parseInt(req.query.pageNumber) || 1;
-        const pageSize = parseInt(req.query.pageSize) || DEFAULT_PAGE_SIZE;
-
-        // Ensure pageSize is within limits
-        const effectivePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
-
-        // Create a cache key based on the query parameters, including filtering and sorting
-        const cacheKey = `listAllSales:${pageNumber}:${effectivePageSize}:${JSON.stringify(req.query)}`;
-
-        // Check if the data is cached
-        const cachedData = cache.get(cacheKey);
-
-        if (cachedData) {
-            console.log('Data retrieved from cache');
-            return res.status(200).json(cachedData);
-        }
-
-        const filter = {};
-        let sorting = '';
-
-        // Extract filtering and sorting parameters from the request query
-        if (req.query.filterByGender) {
-            filter.AgentGender = req.query.filterByGender;
-        }
-
-        if (req.query.sortByName) {
-            sorting = `AgentName ${req.query.sortByName === 'asc' ? 'ASC' : 'DESC'}`;
-        }
-
-        // Fetch sales from the database with optional filtering and sorting
-        const sales = await salesModel.listAllSales(
-            pageNumber,
-            effectivePageSize,
-            filter,
-            sorting
-        );
-
-        // Store the data in cache for future requests
-        cache.set(cacheKey, sales);
+        const pageSize = Math.min(parseInt(req.query.pageSize) || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+        const sales = await salesModel.listAllSales(pageNumber, pageSize);
 
         res.status(200).json(sales);
     } catch (error) {

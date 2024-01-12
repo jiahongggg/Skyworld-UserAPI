@@ -7,11 +7,17 @@ const cache = new NodeCache({ stdTTL: 60 * 5 }); // Cache data for 5 minutes
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 50;
 
-// Helper function to refresh the lead cache
-const refreshLeadCache = async () => {
-    const leadsData = await leadModel.listAllLeads(); // Assuming this function exists in your leadModel
-    cache.set('listAllLeads', leadsData);
+// Invalidate cache for a specific lead
+const invalidateLeadCache = (leadId) => {
+    const cacheKey = `getLead:${leadId}`;
+    cache.del(cacheKey);
 };
+
+// Invalidate all lead list cache entries
+const invalidateLeadListCache = () => {
+    cache.flushAll();
+};
+
 
 const createLead = async (req, res) => {
     try {
@@ -53,8 +59,7 @@ const createLead = async (req, res) => {
 
         await leadModel.createLead(leadData);
 
-        // Update the cache after creating a new lead record
-        await refreshLeadCache();
+        invalidateLeadListCache();
 
         res.status(201).send({ message: 'Lead created successfully', LeadUUID: leadData.LeadUUID });
         // Update the cache after creating a new lead record
@@ -67,23 +72,21 @@ const createLead = async (req, res) => {
 const getLead = async (req, res) => {
     try {
         const leadId = req.params.id;
-
-        // Check if the data is cached
-        const cachedData = cache.get(`getLead:${leadId}`);
-
+        const cacheKey = `getLead:${leadId}`;
+        const cachedData = cache.get(cacheKey);
         if (cachedData) {
             console.log('Data retrieved from cache');
             return res.status(200).json(cachedData);
         }
 
         const lead = await leadModel.getLead(leadId);
-
-        // Store the data in cache for future requests
-        cache.set(`getLead:${leadId}`, lead);
-
+        if(!lead){
+            return res.status(404).json({ message: 'Lead not found' });
+        }
+        cache.set(cacheKey, lead);
         res.status(200).json(lead);
     } catch (error) {
-        res.status(404).json({ message: 'Lead not found' });
+        res.status(404).json({ message: 'Error fetching lead data', error: error.message });
     }
 };
 
@@ -93,8 +96,7 @@ const updateLead = async (req, res) => {
 
         const result = await leadModel.updateLead(leadId, req.body);
 
-        // Update the cache after updating a lead record
-        await refreshLeadCache();
+        invalidateLeadCache(leadId);
 
         res.status(200).json(result);
     } catch (error) {
@@ -108,8 +110,7 @@ const deleteLead = async (req, res) => {
 
         const result = await leadModel.deleteLead(leadId);
 
-        // Update the cache after updating a lead record
-        await refreshLeadCache();
+        invalidateLeadCache(leadId);
 
         res.status(200).json({ message: 'Lead deleted', result });
     } catch (error) {
@@ -119,48 +120,9 @@ const deleteLead = async (req, res) => {
 
 const listAllLeads = async (req, res) => {
     try {
-        // Extract pagination parameters from the request query, defaulting to page 1 and 10 records per page
         const pageNumber = parseInt(req.query.pageNumber) || 1;
-        const pageSize = parseInt(req.query.pageSize) || DEFAULT_PAGE_SIZE;
-
-        // Ensure pageSize is within limits
-        const effectivePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
-
-        // Create a cache key based on the query parameters, including filtering and sorting
-        const cacheKey = `listAllLeads:${pageNumber}:${effectivePageSize}:${JSON.stringify(req.query)}`;
-
-        // Check if the data is cached
-        const cachedData = cache.get(cacheKey);
-
-        if (cachedData) {
-            console.log('Data retrieved from cache');
-            return res.status(200).json(cachedData);
-        }
-
-        const filters = {};
-        let sorting = '';
-
-        // Extract filtering and sorting parameters from the request query
-        if (req.query.filterByStatus) {
-            filters.LeadStatus = req.query.filterByStatus;
-        }
-
-        if (req.query.sortBy) {
-            // Parse the sorting parameter to determine column and order
-            const [sortColumn, sortOrder] = req.query.sortBy.split(':');
-            sorting = `${sortColumn} ${sortOrder === 'asc' ? 'ASC' : 'DESC'}`;
-        }
-
-        // Fetch leads from the database with optional filtering and sorting
-        const leads = await leadModel.listAllLeads(
-            pageNumber,
-            effectivePageSize,
-            filters,
-            sorting
-        );
-
-        // Store the data in cache for future requests
-        cache.set(cacheKey, leads);
+        const pageSize = Math.min(parseInt(req.query.pageSize) || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+        const leads = await leadModel.listAllLeads(pageNumber, pageSize);
 
         res.status(200).json(leads);
     } catch (error) {

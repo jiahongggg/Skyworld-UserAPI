@@ -68,7 +68,7 @@ router.use(checkApiAccess('sales'));
 
 /**
  * @swagger
- * /sales:
+ * /api/v1/sales:
  *   post:
  *     tags: [Sales]
  *     security:
@@ -90,7 +90,7 @@ router.post('/', checkAccess(['admin', 'editor']), salesController.createSales);
 
 /**
  * @swagger
- * /sales:
+ * /api/v1/sales:
  *   get:
  *     tags: [Sales]
  *     security:
@@ -106,7 +106,7 @@ router.get('/', salesController.listAllSales);
 
 /**
  * @swagger
- * /sales/{id}:
+ * /api/v1/sales/{id}:
  *   get:
  *     tags: [Sales]
  *     security:
@@ -129,7 +129,7 @@ router.get('/:id', salesController.getSales);
 
 /**
  * @swagger
- * /sales/{id}:
+ * /api/v1/sales/{id}:
  *   put:
  *     tags: [Sales]
  *     security:
@@ -158,7 +158,7 @@ router.put('/:id', checkAccess(['admin', 'editor']), salesController.updateSales
 
 /**
  * @swagger
- * /sales/{id}:
+ * /api/v1/sales/{id}:
  *   delete:
  *     tags: [Sales]
  *     security:

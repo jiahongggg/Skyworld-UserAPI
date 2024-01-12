@@ -18,7 +18,7 @@ router.use(checkApiAccess('customers'));
 
 /**
  * @swagger
- * /customers:
+ * /api/v1/customers:
  *   post:
  *     tags: [Customers]
  *     security:
@@ -40,7 +40,7 @@ router.post('/', checkAccess(['admin', 'editor']), customerController.createCust
 
 /**
  * @swagger
- * /customers:
+ * /api/v1/customers:
  *   get:
  *     tags: [Customers]
  *     security:
@@ -56,7 +56,7 @@ router.get('/', customerController.listAllCustomers);
 
 /**
  * @swagger
- * /customers/{id}:
+ * /api/v1/customers/{id}:
  *   get:
  *     tags: [Customers]
  *     security:
@@ -79,7 +79,7 @@ router.get('/:id', customerController.getCustomer);
 
 /**
  * @swagger
- * /customers/{id}:
+ * /api/v1/customers/{id}:
  *   put:
  *     tags: [Customers]
  *     security:
@@ -108,7 +108,7 @@ router.put('/:id', checkAccess(['admin', 'editor']), customerController.updateCu
 
 /**
  * @swagger
- * /customers/{id}:
+ * /api/v1/customers/{id}:
  *   delete:
  *     tags: [Customers]
  *     security:
