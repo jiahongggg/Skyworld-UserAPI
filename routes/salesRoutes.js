@@ -79,7 +79,7 @@ router.use(checkApiAccess('sales'));
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/SalesRecord'
+ *             $ref: '#/components/schemas/Sales'
  *     responses:
  *       201:
  *         description: Sales record created successfully
@@ -147,7 +147,7 @@ router.get('/:id', salesController.getSales);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/SalesRecord'
+ *             $ref: '#/components/schemas/Sales'
  *     responses:
  *       200:
  *         description: Sales record updated successfully
