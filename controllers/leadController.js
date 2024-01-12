@@ -80,7 +80,7 @@ const getLead = async (req, res) => {
         }
 
         const lead = await leadModel.getLead(leadId);
-        if(!lead){
+        if (!lead) {
             return res.status(404).json({ message: 'Lead not found' });
         }
         cache.set(cacheKey, lead);

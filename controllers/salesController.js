@@ -68,7 +68,7 @@ const getSales = async (req, res) => {
         }
 
         const sales = await salesModel.getSales(salesId);
-        if(!sales) {
+        if (!sales) {
             return res.status(404).json({ message: 'Sales not found' });
         }
         cache.set(cacheKey, sales);

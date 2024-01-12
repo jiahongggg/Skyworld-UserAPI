@@ -4,7 +4,7 @@ const userApiCollectionGroupModel = require('../models/userApiCollectionGroupMod
 const apiCollectionGroupsModel = require('../models/apiCollectionGroupsModel');
 const { validationResult, check } = require('express-validator');
 const { v4: uuidv4 } = require('uuid');
-const NodeCache = require('node-cache'); 
+const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 60 * 5 }); // Cache data for 5 minutes
 
 // Helper function for input validation
@@ -132,48 +132,48 @@ const listUsers = async (req, res) => {
 
 // Function to assign API collection group to a user
 const assignApiCollectionGroupToUser = async (req, res) => {
-  try {
-    const { userUUID, apiCollectionGroupId } = req.body;
-    const uuid = uuidv4(); // Generate a UUID for the user_api_collection_group
-    await userApiCollectionGroupModel.assignGroupToUser(uuid, userUUID, apiCollectionGroupId);
-    res.status(201).json({ message: 'API Collection Group assigned successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error', error: error.message });
-  }
+    try {
+        const { userUUID, apiCollectionGroupId } = req.body;
+        const uuid = uuidv4(); // Generate a UUID for the user_api_collection_group
+        await userApiCollectionGroupModel.assignGroupToUser(uuid, userUUID, apiCollectionGroupId);
+        res.status(201).json({ message: 'API Collection Group assigned successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
 };
 
 // Function to list API collection groups for a user
 const listUserApiCollectionGroups = async (req, res) => {
-  try {
-    const userUUID = req.user.id; // Get the user UUID from the request parameters
-    console.log(`test: ${req.user.id}`);
-    console.log(`Retrieving API collection groups for user ${userUUID}`);
-    const groups = await userApiCollectionGroupModel.listGroupsForUser(userUUID);
+    try {
+        const userUUID = req.user.id; // Get the user UUID from the request parameters
+        console.log(`test: ${req.user.id}`);
+        console.log(`Retrieving API collection groups for user ${userUUID}`);
+        const groups = await userApiCollectionGroupModel.listGroupsForUser(userUUID);
 
-    res.json(groups);
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error', error: error.message });
-  }
+        res.json(groups);
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
 };
 
 // Function to create a new API collection group
 const createApiCollectionGroup = async (req, res) => {
-  try {
-    const { name } = req.body;
-    await apiCollectionGroupsModel.createGroup(name);
-    res.status(201).json({ message: 'API Collection Group created successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Internal server error', error: error.message });
-  }
+    try {
+        const { name } = req.body;
+        await apiCollectionGroupsModel.createGroup(name);
+        res.status(201).json({ message: 'API Collection Group created successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
 };
 
 module.exports = {
-  createUser: [validateUserInput, createUser],
-  getUserDetails,
-  updateUser: [validateUserInput, updateUser],
-  deleteUser,
-  listUsers,
-  assignApiCollectionGroupToUser,
-  listUserApiCollectionGroups,
-  createApiCollectionGroup,
+    createUser: [validateUserInput, createUser],
+    getUserDetails,
+    updateUser: [validateUserInput, updateUser],
+    deleteUser,
+    listUsers,
+    assignApiCollectionGroupToUser,
+    listUserApiCollectionGroups,
+    createApiCollectionGroup,
 };
