@@ -99,7 +99,7 @@ const deleteSales = async (req, res) => {
         // Refresh cache after deleting a sales record
         await refreshSalesCache();
 
-        res.status(200).json({ message: 'Sales deleted successfully', result });
+        res.status(200).json({ message: 'Sales deleted', result });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
