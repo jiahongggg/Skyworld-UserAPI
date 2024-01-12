@@ -67,6 +67,8 @@ The SkyWorld User API relies on the following dependencies:
 - **mysql2**: MySQL database driver for Node.js.
 - **mysql2-promise**: Promise-based wrapper for the MySQL 2 package.
 - **node-cache**: Library for caching data in Node.js applications.
+- **swagger-jsdoc**: Package to integrate Swagger using JSDoc.
+- **swagger-ui-express**: Middleware for serving Swagger UI in Express applications.
 - **uuid**: Library for generating UUIDs (Universally Unique Identifiers).
 - **winston**: A logger library for Node.js.
 - **winston-mongodb**: Winston transport for MongoDB.
@@ -82,7 +84,7 @@ The SkyWorld User API relies on the following dependencies:
 To install these dependencies, run the following command:
 
 ```bash
-npm install bcryptjs cookie-parser cors crypto dotenv express express-rate-limit express-validator express-winston helmet jsonwebtoken mongodb morgan mysql2 mysql2-promise node-cache uuid winston winston-mongodb --save
+npm install bcryptjs cookie-parser cors crypto dotenv express express-rate-limit express-validator express-winston helmet jsonwebtoken mongodb morgan mysql2 mysql2-promise node-cache swagger-jsdoc swagger-ui-express uuid winston winston-mongodb --save
 ```
 
 ## API Endpoints

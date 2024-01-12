@@ -9,13 +9,174 @@ router.use(verifyToken);
 // Use checkApiAccess middleware for '/sales' route
 router.use(checkApiAccess('sales'));
 
-router.route('/')
-  .post(checkAccess(['admin', 'editor']), salesController.createSales)
-  .get(salesController.listAllSales);
+/**
+ * @swagger
+ * tags:
+ *   name: Sales
+ *   description: Sale management
+ */
 
-router.route('/:id')
-  .get(salesController.getSales)
-  .put(checkAccess(['admin', 'editor']), salesController.updateSales)
-  .delete(checkAccess('admin'), salesController.deleteSales);
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Sales:
+ *       type: object
+ *       required:
+ *         - AgentName
+ *         - AgentAge
+ *         - AgentGender
+ *         - AgentEmail
+ *         - AgentICPassportNo
+ *         - AgentSalutation
+ *         - AgentNationality
+ *         - AgentContactNo
+ *         - AgentAddress
+ *       properties:
+ *         AgentName:
+ *           type: string
+ *         AgentAge:
+ *           type: integer
+ *         AgentGender:
+ *           type: string
+ *         AgentEmail:
+ *           type: string
+ *         AgentICPassportNo:
+ *           type: string
+ *         AgentSalutation:
+ *           type: string
+ *         AgentNationality:
+ *           type: string
+ *         AgentContactNo:
+ *           type: string
+ *         AgentAddress:
+ *           type: object
+ *           properties:
+ *             Address:
+ *               type: string
+ *             Postcode:
+ *               type: string
+ *             City:
+ *               type: string
+ *             State:
+ *               type: string
+ *             Country:
+ *               type: string
+ *         Remark:
+ *           type: string
+ */
+
+/**
+ * @swagger
+ * /sales:
+ *   post:
+ *     tags: [Sales]
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Create a new sales record
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SalesRecord'
+ *     responses:
+ *       201:
+ *         description: Sales record created successfully
+ *       400:
+ *         description: Bad request
+ */
+router.post('/', checkAccess(['admin', 'editor']), salesController.createSales);
+
+/**
+ * @swagger
+ * /sales:
+ *   get:
+ *     tags: [Sales]
+ *     security:
+ *       - bearerAuth: []
+ *     summary: List all sales records
+ *     responses:
+ *       200:
+ *         description: A list of sales records
+ *       500:
+ *         description: Error fetching sales records
+ */
+router.get('/', salesController.listAllSales);
+
+/**
+ * @swagger
+ * /sales/{id}:
+ *   get:
+ *     tags: [Sales]
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Get a specific sales record
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Unique ID of the sales record
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sales record retrieved successfully
+ *       404:
+ *         description: Sales record not found
+ */
+router.get('/:id', salesController.getSales);
+
+/**
+ * @swagger
+ * /sales/{id}:
+ *   put:
+ *     tags: [Sales]
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Update a specific sales record
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Unique ID of the sales record
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/SalesRecord'
+ *     responses:
+ *       200:
+ *         description: Sales record updated successfully
+ *       400:
+ *         description: Bad request
+ */
+router.put('/:id', checkAccess(['admin', 'editor']), salesController.updateSales);
+
+/**
+ * @swagger
+ * /sales/{id}:
+ *   delete:
+ *     tags: [Sales]
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Delete a specific sales record
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Unique ID of the sales record
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sales record deleted successfully
+ *       400:
+ *         description: Bad request
+ */
+router.delete('/:id', checkAccess('admin'), salesController.deleteSales);
 
 module.exports = router;
