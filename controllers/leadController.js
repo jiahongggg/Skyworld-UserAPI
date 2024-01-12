@@ -7,6 +7,12 @@ const cache = new NodeCache({ stdTTL: 60 * 5 }); // Cache data for 5 minutes
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 50;
 
+// Helper function to refresh the lead cache
+const refreshLeadCache = async () => {
+    const leadsData = await leadModel.listAllLeads(); // Assuming this function exists in your leadModel
+    cache.set('listAllLeads', leadsData);
+};
+
 const createLead = async (req, res) => {
     try {
         console.log("Received lead data:", req.body);
@@ -47,7 +53,12 @@ const createLead = async (req, res) => {
 
         await leadModel.createLead(leadData);
 
+        // Update the cache after creating a new lead record
+        await refreshLeadCache();
+
         res.status(201).send({ message: 'Lead created successfully', LeadUUID: leadData.LeadUUID });
+        // Update the cache after creating a new lead record
+        cache.del('listAllLeads'); // Delete the cached data to refresh it
     } catch (error) {
         res.status(500).send({ message: 'Error creating lead', error: error.message });
     }
@@ -55,7 +66,21 @@ const createLead = async (req, res) => {
 
 const getLead = async (req, res) => {
     try {
-        const lead = await leadModel.getLead(req.params.id);
+        const leadId = req.params.id;
+
+        // Check if the data is cached
+        const cachedData = cache.get(`getLead:${leadId}`);
+
+        if (cachedData) {
+            console.log('Data retrieved from cache');
+            return res.status(200).json(cachedData);
+        }
+
+        const lead = await leadModel.getLead(leadId);
+
+        // Store the data in cache for future requests
+        cache.set(`getLead:${leadId}`, lead);
+
         res.status(200).json(lead);
     } catch (error) {
         res.status(404).json({ message: 'Lead not found' });
@@ -64,7 +89,13 @@ const getLead = async (req, res) => {
 
 const updateLead = async (req, res) => {
     try {
-        const result = await leadModel.updateLead(req.params.id, req.body);
+        const leadId = req.params.id;
+
+        const result = await leadModel.updateLead(leadId, req.body);
+
+        // Update the cache after updating a lead record
+        await refreshLeadCache();
+
         res.status(200).json(result);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -73,7 +104,13 @@ const updateLead = async (req, res) => {
 
 const deleteLead = async (req, res) => {
     try {
-        const result = await leadModel.deleteLead(req.params.id);
+        const leadId = req.params.id;
+
+        const result = await leadModel.deleteLead(leadId);
+
+        // Update the cache after updating a lead record
+        await refreshLeadCache();
+
         res.status(200).json({ message: 'Lead deleted', result });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -96,34 +133,36 @@ const listAllLeads = async (req, res) => {
         const cachedData = cache.get(cacheKey);
 
         if (cachedData) {
-            res.status(200).json(cachedData);
-        } else {
-            const filters = {};
-            let sorting = '';
-
-            // Extract filtering and sorting parameters from the request query
-            if (req.query.filterByStatus) {
-                filters.LeadStatus = req.query.filterByStatus;
-            }
-
-            if (req.query.sortBy) {
-                // Parse the sorting parameter to determine column and order
-                const [sortColumn, sortOrder] = req.query.sortBy.split(':');
-                sorting = `${sortColumn} ${sortOrder === 'asc' ? 'ASC' : 'DESC'}`;
-            }
-
-            // Fetch leads from the database with optional filtering and sorting
-            const leads = await leadModel.listAllLeads(
-                pageNumber,
-                effectivePageSize,
-                filters,
-                sorting
-            );
-
-            cache.set(cacheKey, leads);
-
-            res.status(200).json(leads);
+            console.log('Data retrieved from cache');
+            return res.status(200).json(cachedData);
         }
+
+        const filters = {};
+        let sorting = '';
+
+        // Extract filtering and sorting parameters from the request query
+        if (req.query.filterByStatus) {
+            filters.LeadStatus = req.query.filterByStatus;
+        }
+
+        if (req.query.sortBy) {
+            // Parse the sorting parameter to determine column and order
+            const [sortColumn, sortOrder] = req.query.sortBy.split(':');
+            sorting = `${sortColumn} ${sortOrder === 'asc' ? 'ASC' : 'DESC'}`;
+        }
+
+        // Fetch leads from the database with optional filtering and sorting
+        const leads = await leadModel.listAllLeads(
+            pageNumber,
+            effectivePageSize,
+            filters,
+            sorting
+        );
+
+        // Store the data in cache for future requests
+        cache.set(cacheKey, leads);
+
+        res.status(200).json(leads);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching leads', error: error.message });
     }

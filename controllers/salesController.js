@@ -7,6 +7,12 @@ const cache = new NodeCache({ stdTTL: 60 * 5 }); // Cache data for 5 minutes
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 50;
 
+// Helper function to refresh the sales cache
+const refreshSalesCache = async () => {
+    const salesData = await salesModel.listAllSales(); // Assuming this function exists in your salesModel
+    cache.set('listAllSales', salesData);
+};
+
 const createSales = async (req, res) => {
     try {
         console.log("Received sales data:", req.body);
@@ -36,7 +42,11 @@ const createSales = async (req, res) => {
 
         await salesModel.createSales(salesData);
 
+        // Update the cache after creating a new sales record
+        await refreshSalesCache();
+
         res.status(201).send({ message: 'Sales created successfully', SalesAgentID: salesData.SalesAgentID });
+
     } catch (error) {
         res.status(500).send({ message: 'Error creating sales', error: error.message });
     }
@@ -44,7 +54,21 @@ const createSales = async (req, res) => {
 
 const getSales = async (req, res) => {
     try {
-        const sales = await salesModel.getSales(req.params.id);
+        const salesId = req.params.id;
+
+        // Check if the data is cached
+        const cachedData = cache.get(`getSales:${salesId}`);
+
+        if (cachedData) {
+            console.log('Data retrieved from cache');
+            return res.status(200).json(cachedData);
+        }
+
+        const sales = await salesModel.getSales(salesId);
+
+        // Store the data in cache for future requests
+        cache.set(`getSales:${salesId}`, sales);
+
         res.status(200).json(sales);
     } catch (error) {
         res.status(404).json({ message: 'Sales not found' });
@@ -53,7 +77,13 @@ const getSales = async (req, res) => {
 
 const updateSales = async (req, res) => {
     try {
-        const result = await salesModel.updateSales(req.params.id, req.body);
+        const salesId = req.params.id;
+
+        const result = await salesModel.updateSales(salesId, req.body);
+
+        // Update the cache after updating a sales record
+        await refreshSalesCache();
+
         res.status(200).json(result);
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -62,8 +92,14 @@ const updateSales = async (req, res) => {
 
 const deleteSales = async (req, res) => {
     try {
-        const result = await salesModel.deleteSales(req.params.id);
-        res.status(200).json({ message: 'Sales deleted', result });
+        const salesId = req.params.id;
+
+        const result = await salesModel.deleteSales(salesId);
+
+        // Refresh cache after deleting a sales record
+        await refreshSalesCache();
+
+        res.status(200).json({ message: 'Sales deleted successfully', result });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }

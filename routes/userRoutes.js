@@ -118,6 +118,21 @@ router.use(verifyToken);
  */
 router.post('/', checkAccess(['admin']), userApiController.createUser);
 
+// Swagger Documentation for Listing All Users
+/**
+ * @swagger
+ * /api/v1/users:
+ *   get:
+ *     security:
+ *       - bearerAuth: []
+ *     summary: List all users
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Users retrieved successfully
+ */
+router.get('/', checkAccess(['admin','editor']), userApiController.listUsers);
+
 // Swagger Documentation for Getting User Details
 /**
  * @swagger
