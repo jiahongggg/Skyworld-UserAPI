@@ -1,6 +1,6 @@
-# SkyWorld User API
+# SkyWorld API
 
-The SkyWorld User API is a Node.js-based RESTful service that follows the MVC pattern. It provides functionalities for user authentication, management, and token operations, including CRUD operations for user accounts.
+The SkyWorld API is a Node.js-based RESTful service that follows the MVC pattern. It provides functionalities for user authentication, management, and token operations, including CRUD operations for authorized users.
 
 ## Table of Contents
 
