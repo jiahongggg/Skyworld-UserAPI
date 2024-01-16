@@ -104,7 +104,16 @@ async function updateUser(userId, updateData) {
 async function deleteUser(userId) {
   const connection = await db.connect();
   try {
+    await connection.beginTransaction();
+
+    await connection.execute('DELETE FROM user_api_collection_group WHERE UserUUID = ?', [userId]);
+
     await connection.execute('DELETE FROM users WHERE UserUUID = ?', [userId]);
+
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
   } finally {
     await connection.end();
   }
